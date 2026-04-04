@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+playout:
+  transition_seconds: 3
+  filler_random_delay_minutes: 5
+
+fetcher:
+  yt_dlp_path: "/usr/local/bin/yt-dlp"
+  max_resolution: 1080
+  cache_dir: "data/cache"
+  ready_dir: "data/ready"
+  thumbnail_dir: "data/thumbnails"
+  max_cache_gb: 50
+  prefetch_threshold: 3
+
+queue:
+  max_requests_per_caller_per_hour: 3
+  allow_duplicate_in_queue: false
+  empty_queue_action: "random_play"
+
+ivr:
+  enabled: true
+  webhook_base_path: "/jambonz"
+  welcome_jingle: "assets/jingles/welcome.wav"
+  max_attempts: 3
+  gather_timeout_seconds: 10
+  phone_number: "+44XXXXXXXXXX"
+
+database:
+  path: "data/box.db"
+
+channel:
+  width: 1280
+  height: 720
+  phone_number_display: "0900 THE BOX"

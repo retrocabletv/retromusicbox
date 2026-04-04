@@ -1,0 +1,16 @@
+data/cache/
+data/ready/
+data/thumbnails/
+data/box.db
+data/box.db-wal
+data/box.db-shm
+web/channel/node_modules/
+web/channel/dist/
+*.exe
+*.dll
+*.so
+*.dylib
+/boxd
+/boxctl
+vendor/
+.env
