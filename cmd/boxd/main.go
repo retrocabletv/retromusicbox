@@ -42,6 +42,11 @@ func main() {
 	// Create services
 	catService := catalogue.NewService(database)
 	queueService := queue.NewService(database, cfg.Queue.MaxRequestsPerCallerPerHour, cfg.Queue.AllowDuplicateInQueue)
+
+	// Reset any requests stuck from a previous unclean shutdown
+	if err := queueService.ResetStale(); err != nil {
+		log.Printf("Warning: failed to reset stale requests: %v", err)
+	}
 	hub := ws.NewHub()
 	fetcherService := fetcher.NewService(cfg.Fetcher, catService, queueService)
 	controller := playout.NewController(cfg.Playout, cfg.Channel, catService, queueService, fetcherService, hub)
@@ -367,7 +372,7 @@ func handleRequestPage(channelCfg config.ChannelConfig) http.HandlerFunc {
   <h1>THE BOX</h1>
   <p class="subtitle">REQUEST A VIDEO</p>
   <div class="form-group">
-    <input type="text" id="code" maxlength="4" placeholder="0000" pattern="\d{4}">
+    <input type="text" id="code" maxlength="3" placeholder="000" pattern="\d{3}">
   </div>
   <button onclick="submitRequest()">REQUEST</button>
   <div id="result" class="result"></div>
@@ -377,7 +382,7 @@ func handleRequestPage(channelCfg config.ChannelConfig) http.HandlerFunc {
 async function submitRequest() {
   const code = document.getElementById('code').value.trim();
   const result = document.getElementById('result');
-  if (!/^\d{4}$/.test(code)) { result.className='result error'; result.textContent='Enter a 4-digit code'; return; }
+  if (!/^\d{3}$/.test(code)) { result.className='result error'; result.textContent='Enter a 3-digit code'; return; }
   try {
     const resp = await fetch('/api/queue', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code})});
     const data = await resp.json();

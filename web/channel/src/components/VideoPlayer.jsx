@@ -11,9 +11,12 @@ export default function VideoPlayer({ video, onEnded, onError }) {
     el.src = video.media_url
     el.load()
 
+    el.muted = true
     const playPromise = el.play()
     if (playPromise) {
-      playPromise.catch((err) => {
+      playPromise.then(() => {
+        el.muted = false
+      }).catch((err) => {
         console.error('Autoplay failed:', err)
         onError?.('Autoplay failed: ' + err.message)
       })

@@ -57,13 +57,13 @@ func (h *Handler) HandleCall(w http.ResponseWriter, r *http.Request) {
 		},
 		{
 			"verb":       "say",
-			"text":       "Welcome to The Box. Enter your four digit catalogue number followed by hash.",
+			"text":       "Welcome to The Box. Enter your three digit catalogue number followed by hash.",
 			"synthesizer": map[string]string{"vendor": "google", "language": "en-GB"},
 		},
 		{
 			"verb":        "gather",
 			"input":       []string{"dtmf"},
-			"numDigits":   4,
+			"numDigits":   3,
 			"finishOnKey": "#",
 			"timeout":     h.cfg.GatherTimeoutSeconds,
 			"actionHook":  h.cfg.WebhookBasePath + "/dtmf",
@@ -149,7 +149,7 @@ func (h *Handler) respondInvalid(w http.ResponseWriter, from string, attempt int
 		{
 			"verb":        "gather",
 			"input":       []string{"dtmf"},
-			"numDigits":   4,
+			"numDigits":   3,
 			"finishOnKey": "#",
 			"timeout":     h.cfg.GatherTimeoutSeconds,
 			"actionHook":  h.cfg.WebhookBasePath + "/dtmf",

@@ -132,6 +132,21 @@ html, body, #root {
   flex-shrink: 0;
 }
 
+.catalogue-label {
+  color: #FFD700;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.catalogue-info {
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
 /* ===== Marquee ===== */
 .marquee-container {
   flex: 1;

@@ -69,16 +69,16 @@ func (s *Service) nextCode() (string, error) {
 	}
 
 	if !maxCode.Valid || maxCode.String == "" {
-		return "0001", nil
+		return "001", nil
 	}
 
 	var num int
 	fmt.Sscanf(maxCode.String, "%d", &num)
 	num++
-	if num > 9999 {
-		return "", fmt.Errorf("catalogue full: maximum 9999 entries")
+	if num > 999 {
+		return "", fmt.Errorf("catalogue full: maximum 999 entries")
 	}
-	return fmt.Sprintf("%04d", num), nil
+	return fmt.Sprintf("%03d", num), nil
 }
 
 func (s *Service) GetByCode(code string) (*Entry, error) {

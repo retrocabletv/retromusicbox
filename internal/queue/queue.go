@@ -243,6 +243,13 @@ func (s *Service) ActiveCount() (int, error) {
 	return count, err
 }
 
+// ResetStale marks any playing/fetching requests as queued. Called on startup
+// to recover from unclean shutdowns.
+func (s *Service) ResetStale() error {
+	_, err := s.db.Exec(`UPDATE requests SET status = 'queued' WHERE status IN ('playing', 'fetching')`)
+	return err
+}
+
 func (s *Service) SetReady(catalogueCode string) error {
 	_, err := s.db.Exec(
 		`UPDATE requests SET status = 'ready' WHERE catalogue_code = ? AND status IN ('queued', 'fetching')`,

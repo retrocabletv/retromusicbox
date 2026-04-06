@@ -6,7 +6,7 @@ playout:
   filler_random_delay_minutes: 5
 
 fetcher:
-  yt_dlp_path: "/usr/local/bin/yt-dlp"
+  yt_dlp_path: "yt-dlp"
   max_resolution: 1080
   cache_dir: "data/cache"
   ready_dir: "data/ready"

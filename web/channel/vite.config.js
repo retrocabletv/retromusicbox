@@ -6,6 +6,7 @@ export default defineConfig({
   build: {
     outDir: '../../cmd/boxd/static',
     emptyOutDir: true,
+    assetsDir: 'static',
   },
   server: {
     proxy: {

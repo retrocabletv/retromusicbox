@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useBoxSocket } from './hooks/useBoxSocket'
 import VideoPlayer from './components/VideoPlayer'
 import DigitDisplay from './components/DigitDisplay'
@@ -16,6 +16,14 @@ export default function App() {
   const [catalogue, setCatalogue] = useState([])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [transitionVideo, setTransitionVideo] = useState(null)
+
+  // Fetch catalogue on mount so the digit display always has entries to cycle
+  useEffect(() => {
+    fetch('/api/catalogue?limit=999')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setCatalogue(data) })
+      .catch(() => {})
+  }, [])
 
   const handleMessage = useCallback((msg) => {
     switch (msg.type) {
@@ -95,6 +103,7 @@ export default function App() {
         queue={queue}
         phoneNumber={phoneNumber}
         positionTotal={positionTotal}
+        catalogue={catalogue}
       />
 
       <Scanlines />

@@ -73,7 +73,7 @@ func Load(path string) (*Config, error) {
 			FillerRandomDelayMinutes: 5,
 		},
 		Fetcher: FetcherConfig{
-			YtDlpPath:        "/usr/local/bin/yt-dlp",
+			YtDlpPath:        "yt-dlp",
 			MaxResolution:     1080,
 			CacheDir:          "data/cache",
 			ReadyDir:          "data/ready",
