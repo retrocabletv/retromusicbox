@@ -3,16 +3,18 @@
    Just save and refresh the browser.
    ================================ */
 
-/* Font: Arial Bold, stroked to mimic 90s broadcast CG */
+/* Font: ModeSeven */
 .channel, .channel * {
-  font-family: Arial, Helvetica, sans-serif !important;
+  font-family: ModeSeven, Arial, Helvetica, sans-serif !important;
 }
 
-/* Bottom ticker container — title safe zone (5% inset = ~36px on 720px) */
+/* Bottom ticker container — title safe zone, wider to compensate for scaleX */
 .bottom-ticker {
   left: 36px !important;
-  right: 36px !important;
+  right: -80px !important;
   bottom: 30px !important;
+  /* Clip at the actual safe zone */
+  clip-path: inset(0 116px 0 0) !important;
 }
 
 /* Bottom ticker text */
@@ -21,44 +23,57 @@
   height: 33px !important;
   line-height: 33px !important;
   font-weight: bold !important;
-  /* No horizontal squash — let it breathe */
-  transform: none !important;
-  /* Clip at safe zone edge */
+  /* Compact horizontally to match the reference */
+  transform: scaleX(0.82) !important;
+  transform-origin: left center !important;
+  /* Tight tracking */
+  letter-spacing: -1px;
+  /* Clip at edge */
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  /* Tight tracking */
-  letter-spacing: -0.5px;
-  /* Heavy black stroke */
-  -webkit-text-stroke: 1.5px #000;
-  paint-order: stroke fill;
+  /* Heavy drop shadow — like genlock keying */
+  -webkit-text-stroke: 0px;
   text-shadow:
+    3px 3px 0 #000,
     2px 2px 0 #000,
+    1px 1px 0 #000,
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000,
     2px 0 0 #000,
     0 2px 0 #000,
     -2px 0 0 #000,
-    0 -2px 0 #000;
+    0 -2px 0 #000,
+    3px 0 0 #000,
+    0 3px 0 #000 !important;
 }
 
-/* Now playing caption */
+/* Now playing caption — same treatment */
 .now-playing-artist,
 .now-playing-title,
 .now-playing-label {
-  transform: none !important;
-  letter-spacing: -0.5px;
-  -webkit-text-stroke: 1px #000;
-  paint-order: stroke fill;
+  transform: scaleX(0.82) !important;
+  transform-origin: left center !important;
+  letter-spacing: -1px;
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000 !important;
 }
 
 /* Request digits */
 .request-digits-text,
 .request-result {
-  transform: none !important;
-  letter-spacing: -0.5px;
-  -webkit-text-stroke: 1.5px #000;
-  paint-order: stroke fill;
+  transform: scaleX(0.82) !important;
+  transform-origin: left center !important;
+  letter-spacing: -1px;
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    1px 1px 0 #000 !important;
 }
 
 /* Catalogue screen text */
@@ -66,10 +81,9 @@
 .catalogue-entry-title,
 .catalogue-code-tab span,
 .catalogue-header h2 {
-  transform: none !important;
-  letter-spacing: -0.5px;
-  -webkit-text-stroke: 0.5px #000;
-  paint-order: stroke fill;
+  transform: scaleX(0.82) !important;
+  transform-origin: left center !important;
+  letter-spacing: -1px;
 }
 
 /* Logo — translucent watermark style */
