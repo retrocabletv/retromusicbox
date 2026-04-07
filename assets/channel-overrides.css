@@ -71,3 +71,8 @@
   -webkit-text-stroke: 0.5px #000;
   paint-order: stroke fill;
 }
+
+/* Logo — translucent watermark style */
+.box-logo-img {
+  opacity: 0.5 !important;
+}
