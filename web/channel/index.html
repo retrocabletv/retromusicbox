@@ -8,11 +8,11 @@
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #000; }
     </style>
-    <!-- Live-editable overrides — edit assets/channel-overrides.css, no rebuild needed -->
-    <link rel="stylesheet" href="/assets/channel-overrides.css" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Live-editable overrides — loaded last so it wins over Vite-bundled CSS -->
+    <link rel="stylesheet" href="/assets/channel-overrides.css" />
   </body>
 </html>

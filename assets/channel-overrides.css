@@ -5,7 +5,7 @@
 
 /* Font: ModeSeven */
 .channel, .channel * {
-  font-family: ModeSeven, Arial, Helvetica, sans-serif !important;
+  font-family: "Geneva Blue" !important;
 }
 
 /* Bottom ticker container — title safe zone, wider to compensate for scaleX */

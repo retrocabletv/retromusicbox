@@ -5,7 +5,6 @@ import BoxLogo from './components/BoxLogo'
 import NowPlaying from './components/NowPlaying'
 import BottomTicker from './components/BottomTicker'
 import RequestDigits from './components/RequestDigits'
-import FillerIdent from './components/FillerIdent'
 import FillerCatalogue from './components/FillerCatalogue'
 import Transition from './components/Transition'
 import Scanlines from './components/Scanlines'
@@ -16,7 +15,7 @@ export default function App() {
   const [video, setVideo] = useState(null)
   const [queue, setQueue] = useState([])
   const [positionTotal, setPositionTotal] = useState(0)
-  const [fillerMode, setFillerMode] = useState('ident')
+  const [fillerMode, setFillerMode] = useState('catalogue_scroll')
   const [catalogue, setCatalogue] = useState([])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [transitionVideo, setTransitionVideo] = useState(null)
@@ -36,12 +35,17 @@ export default function App() {
         setVideo(msg.video)
         setQueue(msg.queue || [])
         setPositionTotal(msg.position_total || 0)
+        if (msg.catalogue && msg.catalogue.length > 0) {
+          setCatalogue(msg.catalogue)
+        }
         setMode('playing')
         break
 
       case 'filler':
         setFillerMode(msg.mode || 'ident')
-        setCatalogue(msg.catalogue || [])
+        if (msg.catalogue && msg.catalogue.length > 0) {
+          setCatalogue(msg.catalogue)
+        }
         setPhoneNumber(msg.phone_number || '')
         setMode('filler')
         break
@@ -60,7 +64,6 @@ export default function App() {
 
       case 'skip':
         setMode('filler')
-        setFillerMode('ident')
         break
 
       // Phone request digit stream from IVR
@@ -86,7 +89,7 @@ export default function App() {
         <div className="click-to-start">
           <div className="ident-title" style={{ fontSize: '48px' }}>THE BOX</div>
           <div style={{
-            fontFamily: "'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif",
+            fontFamily: "'STV5730A', monospace",
             fontSize: '14px',
             fontWeight: 'bold',
             color: '#00FFFF',
@@ -115,16 +118,12 @@ export default function App() {
       {/* Layer 1: Content screens (filler/transition — replace video entirely) */}
       {mode !== 'playing' && (
         <div className="channel-content">
-          {mode === 'filler' && fillerMode === 'ident' && (
-            <FillerIdent phoneNumber={phoneNumber} />
-          )}
-
-          {mode === 'filler' && fillerMode === 'catalogue_scroll' && (
+          {mode === 'filler' && (
             <FillerCatalogue catalogue={catalogue} phoneNumber={phoneNumber} />
           )}
 
-          {mode === 'transition' && transitionVideo && (
-            <Transition video={transitionVideo} />
+          {mode === 'transition' && (
+            <Transition />
           )}
         </div>
       )}
@@ -140,6 +139,7 @@ export default function App() {
           queue={queue}
           phoneNumber={phoneNumber}
           mode={mode}
+          video={video}
         />
 
         <RequestDigits callers={callers} />

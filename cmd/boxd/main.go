@@ -76,6 +76,7 @@ func main() {
 	mux.HandleFunc("GET /api/catalogue", handleListCatalogue(catService))
 	mux.HandleFunc("GET /api/catalogue/search", handleSearchCatalogue(catService))
 	mux.HandleFunc("GET /api/catalogue/{code}", handleGetCatalogue(catService))
+	mux.HandleFunc("PATCH /api/catalogue/{code}", handleUpdateCatalogue(catService))
 	mux.HandleFunc("DELETE /api/catalogue/{code}", handleDeleteCatalogue(catService))
 	mux.HandleFunc("POST /api/catalogue/{code}/cache", handleCacheVideo(catService, fetcherService))
 
@@ -106,6 +107,11 @@ func main() {
 
 	// Static assets (jingles etc)
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+
+	// Stop-set / station ID stings (ad break videos)
+	if cfg.Playout.AdsDir != "" {
+		mux.Handle("GET /ads/", http.StripPrefix("/ads/", http.FileServer(http.Dir(cfg.Playout.AdsDir))))
+	}
 
 	// Request page
 	mux.HandleFunc("GET /request", handleRequestPage(cfg.Channel))
@@ -138,6 +144,11 @@ type addCatalogueRequest struct {
 	YoutubeID string `json:"youtube_id"`
 }
 
+type updateCatalogueRequest struct {
+	Title  *string `json:"title"`
+	Artist *string `json:"artist"`
+}
+
 func handleAddCatalogue(cat *catalogue.Service, fetch *fetcher.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req addCatalogueRequest
@@ -167,7 +178,8 @@ func handleAddCatalogue(cat *catalogue.Service, fetch *fetcher.Service) http.Han
 		// Download thumbnail
 		thumbPath, _ := fetch.DownloadThumbnail(req.YoutubeID, info.Thumbnail)
 
-		entry, err := cat.Add(req.YoutubeID, info.Title, info.Uploader, int(info.Duration), thumbPath)
+		artist, title := info.CleanTitle()
+		entry, err := cat.Add(req.YoutubeID, title, artist, int(info.Duration), thumbPath)
 		if err != nil {
 			httpError(w, fmt.Sprintf("Failed to add: %v", err), http.StatusInternalServerError)
 			return
@@ -225,6 +237,42 @@ func handleGetCatalogue(cat *catalogue.Service) http.HandlerFunc {
 			httpError(w, "Not found", http.StatusNotFound)
 			return
 		}
+		jsonResponse(w, entry)
+	}
+}
+
+func handleUpdateCatalogue(cat *catalogue.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := r.PathValue("code")
+
+		entry, err := cat.GetByCode(code)
+		if err != nil || entry == nil {
+			httpError(w, "Not found", http.StatusNotFound)
+			return
+		}
+
+		var req updateCatalogueRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			httpError(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		title := entry.Title
+		artist := entry.Artist
+		if req.Title != nil {
+			title = *req.Title
+		}
+		if req.Artist != nil {
+			artist = *req.Artist
+		}
+
+		if err := cat.Update(code, title, artist); err != nil {
+			httpError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		entry.Title = title
+		entry.Artist = artist
 		jsonResponse(w, entry)
 	}
 }

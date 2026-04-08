@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"github.com/alexkinch/thebox/internal/catalogue"
 	"github.com/alexkinch/thebox/internal/config"
 	"github.com/alexkinch/thebox/internal/db"
+	"github.com/alexkinch/thebox/internal/fetcher"
 )
 
 func main() {
@@ -27,6 +27,8 @@ func main() {
 		initDB(cfg)
 	case "add":
 		addVideo(cfg)
+	case "edit":
+		editVideo(cfg)
 	case "remove":
 		removeVideo(cfg)
 	case "list":
@@ -35,6 +37,8 @@ func main() {
 		searchVideos(cfg)
 	case "cache-all":
 		cacheAll(cfg)
+	case "refresh":
+		refreshMetadata(cfg)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		printUsage()
@@ -48,12 +52,15 @@ func printUsage() {
 	fmt.Println("Usage: boxctl <command> [args]")
 	fmt.Println()
 	fmt.Println("Commands:")
-	fmt.Println("  init-db                    Initialise the database")
-	fmt.Println("  add --youtube <ID>         Add a video by YouTube ID")
-	fmt.Println("  remove --code <CODE>       Remove a video by catalogue code")
-	fmt.Println("  list                       List all catalogue entries")
-	fmt.Println("  search --query <QUERY>     Search by artist/title")
-	fmt.Println("  cache-all                  Fetch and transcode all catalogue videos")
+	fmt.Println("  init-db                          Initialise the database")
+	fmt.Println("  add --youtube <ID>               Add a video by YouTube ID")
+	fmt.Println("  edit --code <CODE> [--artist <A>] [--title <T>]")
+	fmt.Println("                                   Edit artist/title for a catalogue entry")
+	fmt.Println("  remove --code <CODE>             Remove a video by catalogue code")
+	fmt.Println("  list                             List all catalogue entries")
+	fmt.Println("  search --query <QUERY>           Search by artist/title")
+	fmt.Println("  cache-all                        Fetch and transcode all catalogue videos")
+	fmt.Println("  refresh                          Re-fetch metadata from YouTube and reindex codes to 3-digit")
 }
 
 func loadConfig() *config.Config {
@@ -106,29 +113,77 @@ func addVideo(cfg *config.Config) {
 
 	// Fetch info with yt-dlp
 	fmt.Printf("Fetching info for %s...\n", ytID)
-	ytDlpPath := cfg.Fetcher.YtDlpPath
-	cmd := exec.Command(ytDlpPath, "--dump-json", "--no-download",
-		fmt.Sprintf("https://www.youtube.com/watch?v=%s", ytID))
-	output, err := cmd.Output()
+	fetch := fetcher.NewService(cfg.Fetcher, cat, nil)
+	info, err := fetch.FetchVideoInfo(ytID)
 	if err != nil {
 		log.Fatalf("yt-dlp failed: %v", err)
 	}
 
-	var info struct {
-		Title    string  `json:"title"`
-		Uploader string  `json:"uploader"`
-		Duration float64 `json:"duration"`
-	}
-	if err := json.Unmarshal(output, &info); err != nil {
-		log.Fatalf("Parse error: %v", err)
-	}
+	artist, title := info.CleanTitle()
 
-	entry, err := cat.Add(ytID, info.Title, info.Uploader, int(info.Duration), "")
+	entry, err := cat.Add(ytID, title, artist, int(info.Duration), "")
 	if err != nil {
 		log.Fatalf("Failed to add: %v", err)
 	}
 
 	fmt.Printf("Added: [%s] %s - %s (%ds)\n", entry.Code, entry.Artist, entry.Title, derefInt(entry.DurationSeconds))
+}
+
+func editVideo(cfg *config.Config) {
+	code := ""
+	artist := ""
+	title := ""
+	for i := 2; i < len(os.Args); i++ {
+		switch os.Args[i] {
+		case "--code":
+			if i+1 < len(os.Args) {
+				code = os.Args[i+1]
+				i++
+			}
+		case "--artist":
+			if i+1 < len(os.Args) {
+				artist = os.Args[i+1]
+				i++
+			}
+		case "--title":
+			if i+1 < len(os.Args) {
+				title = os.Args[i+1]
+				i++
+			}
+		}
+	}
+	if code == "" {
+		log.Fatal("Usage: boxctl edit --code <CODE> [--artist <ARTIST>] [--title <TITLE>]")
+	}
+	if artist == "" && title == "" {
+		log.Fatal("At least one of --artist or --title is required")
+	}
+
+	database, err := db.Open(cfg.Database.Path)
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer database.Close()
+
+	cat := catalogue.NewService(database)
+
+	entry, err := cat.GetByCode(code)
+	if err != nil || entry == nil {
+		log.Fatalf("Catalogue entry %s not found", code)
+	}
+
+	if artist == "" {
+		artist = entry.Artist
+	}
+	if title == "" {
+		title = entry.Title
+	}
+
+	if err := cat.Update(code, title, artist); err != nil {
+		log.Fatalf("Failed to update: %v", err)
+	}
+
+	fmt.Printf("Updated: [%s] %s - %s\n", code, artist, title)
 }
 
 func removeVideo(cfg *config.Config) {
@@ -242,6 +297,64 @@ func cacheAll(cfg *config.Config) {
 		}
 		fmt.Println("OK")
 	}
+}
+
+func refreshMetadata(cfg *config.Config) {
+	database, err := db.Open(cfg.Database.Path)
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer database.Close()
+
+	cat := catalogue.NewService(database)
+	fetch := fetcher.NewService(cfg.Fetcher, cat, nil)
+
+	entries, err := cat.GetAll()
+	if err != nil {
+		log.Fatalf("Failed to list: %v", err)
+	}
+
+	// Collect YouTube IDs
+	var youtubeIDs []string
+	for _, e := range entries {
+		youtubeIDs = append(youtubeIDs, e.YoutubeID)
+		fmt.Printf("  Saved: %s (%s - %s)\n", e.YoutubeID, e.Artist, e.Title)
+	}
+
+	fmt.Printf("\nWiping tables and re-adding %d videos...\n\n", len(youtubeIDs))
+
+	// Wipe both tables
+	if _, err := database.Exec(`DELETE FROM requests`); err != nil {
+		log.Fatalf("Failed to clear requests: %v", err)
+	}
+	if _, err := database.Exec(`DELETE FROM catalogue`); err != nil {
+		log.Fatalf("Failed to clear catalogue: %v", err)
+	}
+
+	// Re-add each video with fresh metadata
+	for _, ytID := range youtubeIDs {
+		fmt.Printf("  %s: ", ytID)
+
+		info, err := fetch.FetchVideoInfo(ytID)
+		if err != nil {
+			fmt.Printf("SKIP (yt-dlp failed: %v)\n", err)
+			continue
+		}
+
+		artist, title := info.CleanTitle()
+
+		thumbPath, _ := fetch.DownloadThumbnail(ytID, info.Thumbnail)
+
+		entry, err := cat.Add(ytID, title, artist, int(info.Duration), thumbPath)
+		if err != nil {
+			fmt.Printf("FAILED: %v\n", err)
+			continue
+		}
+
+		fmt.Printf("[%s] %s - %s\n", entry.Code, entry.Artist, entry.Title)
+	}
+
+	fmt.Println("\nDone.")
 }
 
 func derefInt(p *int) int {

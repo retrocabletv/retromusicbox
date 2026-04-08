@@ -135,6 +135,41 @@ func (s *Service) Delete(code string) error {
 	return nil
 }
 
+func (s *Service) Update(code, title, artist string) error {
+	result, err := s.db.Exec(`UPDATE catalogue SET title = ?, artist = ? WHERE code = ?`, title, artist, code)
+	if err != nil {
+		return err
+	}
+	n, _ := result.RowsAffected()
+	if n == 0 {
+		return fmt.Errorf("catalogue entry %s not found", code)
+	}
+	return nil
+}
+
+func (s *Service) UpdateCode(oldCode, newCode string) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Temporarily disable FK checks so we can update both tables without ordering issues
+	if _, err := tx.Exec(`PRAGMA foreign_keys = OFF`); err != nil {
+		return fmt.Errorf("disable foreign keys: %w", err)
+	}
+	if _, err := tx.Exec(`UPDATE catalogue SET code = ? WHERE code = ?`, newCode, oldCode); err != nil {
+		return fmt.Errorf("update catalogue: %w", err)
+	}
+	if _, err := tx.Exec(`UPDATE requests SET catalogue_code = ? WHERE catalogue_code = ?`, newCode, oldCode); err != nil {
+		return fmt.Errorf("update requests: %w", err)
+	}
+	if _, err := tx.Exec(`PRAGMA foreign_keys = ON`); err != nil {
+		return fmt.Errorf("re-enable foreign keys: %w", err)
+	}
+	return tx.Commit()
+}
+
 func (s *Service) SetVideoPath(youtubeID, videoPath string) error {
 	_, err := s.db.Exec(`UPDATE catalogue SET video_path = ? WHERE youtube_id = ?`, videoPath, youtubeID)
 	return err

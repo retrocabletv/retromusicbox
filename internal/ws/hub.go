@@ -53,6 +53,23 @@ func (h *Hub) Broadcast(msg interface{}) {
 	h.currentState = data
 	h.mu.Unlock()
 
+	h.broadcast(data)
+}
+
+// BroadcastEvent sends a message to all clients without updating the replay
+// state. Use this for supplementary updates (queue changes, dial updates)
+// that don't represent the full channel state.
+func (h *Hub) BroadcastEvent(msg interface{}) {
+	data, err := json.Marshal(msg)
+	if err != nil {
+		log.Printf("[ws] marshal error: %v", err)
+		return
+	}
+
+	h.broadcast(data)
+}
+
+func (h *Hub) broadcast(data []byte) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 

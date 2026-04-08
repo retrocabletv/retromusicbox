@@ -4,6 +4,12 @@ server:
 playout:
   transition_seconds: 3
   filler_random_delay_minutes: 5
+  # Stop sets / station IDs (patent: "commercial breaks assembled and inserted into the video programming")
+  # Drop short .mp4 stings into ads_dir; one will play between every N requested videos.
+  # Set ads_every_n_videos: 0 to disable.
+  ads_dir: "assets/ads"
+  ads_every_n_videos: 2
+  ad_max_seconds: 90
 
 fetcher:
   yt_dlp_path: "yt-dlp"

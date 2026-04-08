@@ -9,7 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,8 +23,64 @@ import (
 type VideoInfo struct {
 	Title       string  `json:"title"`
 	Uploader    string  `json:"uploader"`
+	Artist      string  `json:"artist"`
+	Track       string  `json:"track"`
+	Creator     string  `json:"creator"`
 	Duration    float64 `json:"duration"`
 	Thumbnail   string  `json:"thumbnail"`
+}
+
+// CleanTitle returns a cleaned artist and title from the yt-dlp metadata.
+// It prefers the structured artist/track fields, falls back to parsing
+// "Artist - Title" from the raw title, and strips common video junk.
+func (v *VideoInfo) CleanTitle() (artist, title string) {
+	artist = firstNonEmpty(v.Artist, v.Creator, v.Uploader)
+	title = firstNonEmpty(v.Track, v.Title)
+
+	// If no structured track field, try to split "Artist - Title" from raw title
+	if v.Track == "" && strings.Contains(v.Title, " - ") {
+		parts := strings.SplitN(v.Title, " - ", 2)
+		if len(parts) == 2 {
+			artist = strings.TrimSpace(parts[0])
+			title = strings.TrimSpace(parts[1])
+		}
+	}
+
+	title = stripVideoJunk(title)
+	artist = strings.TrimSpace(artist)
+	title = strings.TrimSpace(title)
+	return artist, title
+}
+
+// Matches entire bracketed groups containing junk keywords, e.g. "(Official Music Video)", "[4K Upgrade]"
+var bracketedJunk = regexp.MustCompile(
+	`(?i)\s*[\(\[\{][^\)\]\}]*(official|music\s+video|lyric|visuali[sz]er|` +
+		`remaster|video\s+oficial|videoclip|clip\s+officiel|` +
+		`\b4k\b|\bhd\b|\bhq\b|\bmv\b|\bupgrade\b)` +
+		`[^\)\]\}]*[\)\]\}]`,
+)
+
+// Matches unbracketed trailing junk
+var trailingJunk = regexp.MustCompile(
+	`(?i)\s*-?\s*(official\s+(music\s+)?video|official\s+audio|` +
+		`official\s+lyric\s+video|lyric\s+video|lyrics|music\s+video)\s*$`,
+)
+
+func stripVideoJunk(s string) string {
+	s = bracketedJunk.ReplaceAllString(s, "")
+	s = trailingJunk.ReplaceAllString(s, "")
+	s = regexp.MustCompile(`\s{2,}`).ReplaceAllString(s, " ")
+	s = strings.TrimRight(s, " -–—|")
+	return strings.TrimSpace(s)
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			return strings.TrimSpace(v)
+		}
+	}
+	return ""
 }
 
 type Service struct {

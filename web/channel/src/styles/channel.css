@@ -1,15 +1,20 @@
 /* ===== Fonts ===== */
-/* Arial Bold with forced aliasing to simulate 90s broadcast CG output */
+@font-face {
+  font-family: 'STV5730A';
+  src: url('/fonts/STV5730A.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ===== Base ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* Kill smooth anti-aliasing — force aliased/pixelated text rendering */
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: unset;
-  font-smooth: never;
+  /* Smooth the pixel font for a broadcast CG look */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body, #root {
@@ -17,7 +22,7 @@ html, body, #root {
   height: 100%;
   overflow: hidden;
   background: #000;
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   color: #fff;
 }
 
@@ -102,6 +107,12 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 4px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.code-badge.visible {
+  opacity: 1;
 }
 
 .code-badge-arrow {
@@ -111,7 +122,7 @@ html, body, #root {
 }
 
 .code-badge-number {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 16px;
   color: #000;
   background: #fff;
@@ -137,7 +148,7 @@ html, body, #root {
 }
 
 .now-playing-artist {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 18px;
   font-weight: bold;
   color: #fff;
@@ -146,7 +157,7 @@ html, body, #root {
 }
 
 .now-playing-title {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 16px;
   font-style: italic;
   color: #fff;
@@ -155,7 +166,7 @@ html, body, #root {
 }
 
 .now-playing-label {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 13px;
   color: #ccc;
   text-shadow: 1px 1px 0 #000;
@@ -176,7 +187,7 @@ html, body, #root {
   text-overflow: ellipsis;
   height: 28px;
   line-height: 28px;
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 22px;
   font-weight: bold;
   /* Heavy black outline + subtle colour bleed — simulates genlock keying */
@@ -245,7 +256,7 @@ html, body, #root {
 }
 
 .request-digits-text {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 22px;
   font-weight: bold;
   color: #FFD700;
@@ -254,7 +265,7 @@ html, body, #root {
 }
 
 .request-result {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 22px;
   font-weight: bold;
   text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
@@ -285,7 +296,7 @@ html, body, #root {
   top: 12px;
   right: 20px;
   z-index: 100;
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 10px;
   font-weight: bold;
   color: #FF4444;
@@ -354,7 +365,7 @@ html, body, #root {
 }
 
 .ident-title {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 64px;
   font-weight: bold;
   color: #FFD700;
@@ -368,7 +379,7 @@ html, body, #root {
 }
 
 .ident-subtitle {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 14px;
   font-weight: bold;
   color: #fff;
@@ -378,7 +389,7 @@ html, body, #root {
 }
 
 .ident-phone {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 20px;
   font-weight: bold;
   color: #fff;
@@ -387,7 +398,7 @@ html, body, #root {
 }
 
 .ident-cta {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 14px;
   font-weight: bold;
   color: #00FFFF;
@@ -406,61 +417,66 @@ html, body, #root {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(170deg, #0c0c3a 0%, #060620 50%, #02020e 100%);
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, #2a5a3a 0%, #1e4a2e 30%, #143820 70%, #0c2a16 100%);
+  font-family: 'STV5730A', monospace;
 }
 
 .catalogue-header {
-  padding: 12px 20px 8px;
+  padding: 16px 40px 10px;
   flex-shrink: 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(80, 160, 100, 0.4) 0%, rgba(40, 100, 60, 0.2) 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
 }
 
 .catalogue-header h2 {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 24px;
+  font-family: 'STV5730A', monospace;
+  font-size: 28px;
   font-weight: bold;
-  color: #fff;
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 2px;
+  color: #e0e0e0;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  letter-spacing: 0;
 }
 
 .catalogue-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 4px 20px;
-  gap: 4px;
+  padding: 0;
   overflow: hidden;
 }
 
 .catalogue-entry {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 52px;
+  gap: 16px;
+  padding: 8px 40px;
+  min-height: 80px;
+  background: linear-gradient(180deg,
+    rgba(60, 130, 80, 0.3) 0%,
+    rgba(40, 100, 60, 0.15) 50%,
+    rgba(30, 80, 45, 0.3) 100%
+  );
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(100, 180, 120, 0.1);
 }
 
-.catalogue-code-tab {
-  width: 70px;
-  height: 36px;
-  background: linear-gradient(180deg, #444 0%, #333 40%, #222 100%);
-  border: 1px solid #555;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.catalogue-entry:nth-child(even) {
+  background: linear-gradient(180deg,
+    rgba(50, 120, 70, 0.25) 0%,
+    rgba(35, 90, 55, 0.1) 50%,
+    rgba(25, 70, 40, 0.25) 100%
+  );
 }
 
-.catalogue-code-tab span {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 20px;
+.catalogue-code {
+  font-family: 'STV5730A', monospace;
+  font-size: 64px;
   font-weight: bold;
-  color: #FFD700;
-  text-shadow: 1px 1px 0 #000;
+  color: #d0d0d0;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  min-width: 130px;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .catalogue-entry-info {
@@ -469,113 +485,72 @@ html, body, #root {
 }
 
 .catalogue-entry-artist {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-family: 'STV5730A', monospace;
+  font-size: 26px;
   font-weight: bold;
   color: #fff;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .catalogue-entry-title {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 15px;
-  font-style: italic;
+  font-family: 'STV5730A', monospace;
+  font-size: 24px;
+  font-weight: bold;
   color: #FFD700;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .catalogue-footer {
-  padding: 8px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 40px;
+  background: linear-gradient(180deg, rgba(20, 60, 35, 0.8) 0%, rgba(10, 40, 20, 0.9) 100%);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  gap: 12px;
 }
 
 .catalogue-footer-info {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  font-weight: bold;
-  color: #ccc;
-  line-height: 1.4;
-}
-
-.catalogue-footer-cta {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
+  font-family: 'STV5730A', monospace;
   font-size: 18px;
   font-weight: bold;
-  color: #FFD700;
-  text-shadow: 1px 1px 0 #000;
-  white-space: nowrap;
+  color: #e0e0e0;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
-/* ===== Transition ===== */
+.catalogue-price {
+  color: #fff;
+}
+
+.catalogue-phone {
+  color: #FFD700;
+  font-size: 22px;
+}
+
+.catalogue-footer-disclaimer {
+  font-family: 'STV5730A', monospace;
+  font-size: 12px;
+  color: #aaa;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Transition (fade to black) ===== */
 .transition {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background: #000;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.8s ease;
 }
 
 .transition.visible {
   opacity: 1;
-}
-
-.transition-logo {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 36px;
-  font-weight: bold;
-  color: #FFD700;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-  margin-bottom: 30px;
-  animation: flash 0.5s ease-in-out 2;
-}
-
-@keyframes flash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.transition-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.transition-label {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  color: #00FFFF;
-  letter-spacing: 4px;
-}
-
-.transition-code {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 28px;
-  font-weight: bold;
-  color: #FFD700;
-}
-
-.transition-title {
-  font-family: 'Teletext regular', TeleText, TIFAX, Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  color: #fff;
   text-align: center;
   max-width: 600px;
 }

@@ -21,8 +21,11 @@ type ServerConfig struct {
 }
 
 type PlayoutConfig struct {
-	TransitionSeconds        int `yaml:"transition_seconds"`
-	FillerRandomDelayMinutes int `yaml:"filler_random_delay_minutes"`
+	TransitionSeconds        int    `yaml:"transition_seconds"`
+	FillerRandomDelayMinutes int    `yaml:"filler_random_delay_minutes"`
+	AdsDir                   string `yaml:"ads_dir"`
+	AdsEveryNVideos          int    `yaml:"ads_every_n_videos"`
+	AdMaxSeconds             int    `yaml:"ad_max_seconds"`
 }
 
 type FetcherConfig struct {
@@ -69,8 +72,11 @@ func Load(path string) (*Config, error) {
 	cfg := &Config{
 		Server: ServerConfig{Port: 8080},
 		Playout: PlayoutConfig{
-			TransitionSeconds:        3,
+			TransitionSeconds:        1,
 			FillerRandomDelayMinutes: 5,
+			AdsDir:                   "assets/ads",
+			AdsEveryNVideos:          0,
+			AdMaxSeconds:             90,
 		},
 		Fetcher: FetcherConfig{
 			YtDlpPath:        "yt-dlp",

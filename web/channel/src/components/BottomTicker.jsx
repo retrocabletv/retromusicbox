@@ -6,7 +6,7 @@ function toTitleCase(str) {
   )
 }
 
-export default function BottomTicker({ catalogue, queue, phoneNumber, mode }) {
+export default function BottomTicker({ catalogue, queue, phoneNumber, mode, video }) {
   const [entryIndex, setEntryIndex] = useState(0)
   const [promoIndex, setPromoIndex] = useState(0)
   const promoRef = useRef(null)
@@ -55,8 +55,9 @@ export default function BottomTicker({ catalogue, queue, phoneNumber, mode }) {
     return () => clearInterval(promoRef.current)
   }, [promoMessages.length])
 
-  // Don't render during filler screens
+  // Don't render during filler screens or ad breaks
   if (mode !== 'playing') return null
+  if (video?.is_ad) return null
 
   const currentEntry = entries.length > 0 ? entries[entryIndex % entries.length] : null
   const currentPromo = promoMessages[promoIndex % promoMessages.length]

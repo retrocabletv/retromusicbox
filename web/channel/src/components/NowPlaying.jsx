@@ -8,7 +8,7 @@ export default function NowPlaying({ video, mode }) {
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    if (mode === 'playing' && video) {
+    if (mode === 'playing' && video && !video.is_ad) {
       // Show caption at start of video
       setVisible(true)
       videoRef.current = video.catalogue_code
@@ -24,7 +24,7 @@ export default function NowPlaying({ video, mode }) {
     }
   }, [video?.catalogue_code, mode])
 
-  if (mode !== 'playing' || !video) return null
+  if (mode !== 'playing' || !video || video.is_ad) return null
 
   return (
     <>
@@ -38,7 +38,7 @@ export default function NowPlaying({ video, mode }) {
       </div>
 
       {/* Code badge — top-right next to logo */}
-      <div className="code-badge">
+      <div className={`code-badge ${visible ? 'visible' : ''}`}>
         <span className="code-badge-arrow">&#x2192;</span>
         <span className="code-badge-number">{video.catalogue_code}</span>
       </div>

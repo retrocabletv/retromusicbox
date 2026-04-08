@@ -3,6 +3,10 @@ package playout
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,14 +23,16 @@ const (
 	StateFiller     State = "filler"
 	StatePlaying    State = "playing"
 	StateTransition State = "transition"
+	StateAdBreak    State = "ad_break"
 )
 
 // WebSocket message types
 type PlayMessage struct {
-	Type          string        `json:"type"`
-	Video         VideoInfo     `json:"video"`
-	Queue         []QueueEntry  `json:"queue"`
-	PositionTotal int           `json:"position_total"`
+	Type          string            `json:"type"`
+	Video         VideoInfo         `json:"video"`
+	Queue         []QueueEntry      `json:"queue"`
+	PositionTotal int               `json:"position_total"`
+	Catalogue     []catalogue.Entry `json:"catalogue,omitempty"`
 }
 
 type VideoInfo struct {
@@ -36,6 +42,7 @@ type VideoInfo struct {
 	DurationSecs   int    `json:"duration_seconds"`
 	MediaURL       string `json:"media_url"`
 	ThumbnailURL   string `json:"thumbnail_url"`
+	IsAd           bool   `json:"is_ad,omitempty"`
 }
 
 type FillerMessage struct {
@@ -74,7 +81,7 @@ type Controller struct {
 	stopCh         chan struct{}
 	videoTimer     *time.Timer
 	fillerStart    time.Time
-	fillerMode     int // cycles through filler modes
+	videosSinceAd  int
 }
 
 func NewController(
@@ -104,7 +111,7 @@ func NewController(
 func (c *Controller) Start() {
 	log.Println("[playout] controller starting")
 
-	c.sendFiller("ident")
+	c.sendFiller("catalogue_scroll")
 
 	go c.runLoop()
 }
@@ -154,11 +161,9 @@ func (c *Controller) tick() {
 			return
 		}
 
-		// Cycle filler modes
+		// Re-send catalogue scroll periodically so pages advance
 		if !c.fillerStart.IsZero() && time.Since(c.fillerStart) > 30*time.Second {
-			c.fillerMode = (c.fillerMode + 1) % 3
-			modes := []string{"ident", "catalogue_scroll", "ident"}
-			c.sendFiller(modes[c.fillerMode])
+			c.sendFiller("catalogue_scroll")
 			c.fillerStart = time.Now()
 		}
 
@@ -220,6 +225,8 @@ func (c *Controller) playVideo(req *queue.Request, entry *catalogue.Entry) {
 	queueItems := c.getQueueEntries()
 	total, _ := c.queue.ActiveCount()
 
+	allEntries, _ := c.catalogue.GetAll()
+
 	msg := PlayMessage{
 		Type: "play",
 		Video: VideoInfo{
@@ -232,6 +239,7 @@ func (c *Controller) playVideo(req *queue.Request, entry *catalogue.Entry) {
 		},
 		Queue:         queueItems,
 		PositionTotal: total,
+		Catalogue:     allEntries,
 	}
 	c.hub.Broadcast(msg)
 
@@ -260,6 +268,8 @@ func (c *Controller) playRandom() {
 
 	c.state = StatePlaying
 
+	allEntries, _ := c.catalogue.GetAll()
+
 	msg := PlayMessage{
 		Type: "play",
 		Video: VideoInfo{
@@ -272,6 +282,7 @@ func (c *Controller) playRandom() {
 		},
 		Queue:         nil,
 		PositionTotal: 0,
+		Catalogue:     allEntries,
 	}
 	c.hub.Broadcast(msg)
 
@@ -323,9 +334,12 @@ func (c *Controller) handleRendererMessage(msg json.RawMessage) {
 }
 
 func (c *Controller) advanceQueue() {
+	wasAdBreak := c.state == StateAdBreak
+
 	if c.currentRequest != nil {
 		c.queue.MarkPlayed(c.currentRequest.ID)
 		c.currentRequest = nil
+		c.videosSinceAd++
 	}
 
 	next, err := c.queue.GetNext()
@@ -335,6 +349,14 @@ func (c *Controller) advanceQueue() {
 		return
 	}
 
+	// After a real video, drop in a stop-set sting if it's time and there's
+	// something to come back to. Skip if we just finished an ad ourselves.
+	if !wasAdBreak && c.cfg.AdsEveryNVideos > 0 && c.videosSinceAd >= c.cfg.AdsEveryNVideos && next != nil {
+		if c.tryPlayAdBreak() {
+			return
+		}
+	}
+
 	if next != nil && (next.Status == "ready" || c.fetcher.IsReady(c.getYoutubeID(next.CatalogueCode))) {
 		c.startTransition(next)
 	} else {
@@ -342,11 +364,70 @@ func (c *Controller) advanceQueue() {
 	}
 }
 
+// tryPlayAdBreak picks a random video from the configured ads dir and plays
+// it as a stop-set between requested videos. Returns false if no ad is
+// available (empty/missing dir, no playable files).
+func (c *Controller) tryPlayAdBreak() bool {
+	if c.cfg.AdsDir == "" {
+		return false
+	}
+	entries, err := os.ReadDir(c.cfg.AdsDir)
+	if err != nil {
+		return false
+	}
+	var ads []string
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		ext := strings.ToLower(filepath.Ext(e.Name()))
+		if ext == ".mp4" || ext == ".webm" || ext == ".mov" {
+			ads = append(ads, e.Name())
+		}
+	}
+	if len(ads) == 0 {
+		return false
+	}
+
+	pick := ads[rand.Intn(len(ads))]
+	log.Printf("[playout] ad break: %s", pick)
+
+	c.state = StateAdBreak
+	c.videosSinceAd = 0
+
+	queueItems := c.getQueueEntries()
+	total, _ := c.queue.ActiveCount()
+
+	msg := PlayMessage{
+		Type: "play",
+		Video: VideoInfo{
+			MediaURL: "/ads/" + pick,
+			IsAd:     true,
+		},
+		Queue:         queueItems,
+		PositionTotal: total,
+	}
+	c.hub.Broadcast(msg)
+
+	maxSecs := c.cfg.AdMaxSeconds
+	if maxSecs <= 0 {
+		maxSecs = 90
+	}
+	c.videoTimer = time.AfterFunc(time.Duration(maxSecs)*time.Second, func() {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		if c.state == StateAdBreak {
+			log.Printf("[playout] ad safety timer fired")
+			c.advanceQueue()
+		}
+	})
+	return true
+}
+
 func (c *Controller) goToFiller() {
 	c.state = StateFiller
 	c.fillerStart = time.Now()
-	c.fillerMode = 0
-	c.sendFiller("ident")
+	c.sendFiller("catalogue_scroll")
 }
 
 func (c *Controller) sendFiller(mode string) {
@@ -354,15 +435,13 @@ func (c *Controller) sendFiller(mode string) {
 		c.fillerStart = time.Now()
 	}
 
+	entries, _ := c.catalogue.GetAll()
+
 	msg := FillerMessage{
 		Type:        "filler",
 		Mode:        mode,
+		Catalogue:   entries,
 		PhoneNumber: c.channelCfg.PhoneNumberDisplay,
-	}
-
-	if mode == "catalogue_scroll" {
-		entries, _ := c.catalogue.GetAll()
-		msg.Catalogue = entries
 	}
 
 	c.hub.Broadcast(msg)
@@ -399,7 +478,7 @@ func (c *Controller) NotifyQueueChange() {
 		Queue:         items,
 		PositionTotal: total,
 	}
-	c.hub.Broadcast(msg)
+	c.hub.BroadcastEvent(msg)
 }
 
 func (c *Controller) getQueueEntries() []QueueEntry {

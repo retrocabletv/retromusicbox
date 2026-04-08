@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 
-const ENTRIES_PER_PAGE = 7
+const ENTRIES_PER_PAGE = 4
 
 export default function FillerCatalogue({ catalogue, phoneNumber }) {
   const [page, setPage] = useState(0)
@@ -33,17 +33,15 @@ export default function FillerCatalogue({ catalogue, phoneNumber }) {
   return (
     <div className="filler-catalogue">
       <div className="catalogue-header">
-        <h2>SELECTION NUMBER</h2>
+        <h2>M U S I C&nbsp;&nbsp;&nbsp;M E N U</h2>
       </div>
 
       <div className="catalogue-body">
         {pageRows.map((row, i) => (
           <div key={`${page}-${i}`} className="catalogue-entry">
-            <div className="catalogue-code-tab">
-              <span>{row.code}</span>
-            </div>
+            <div className="catalogue-code">{row.code}</div>
             <div className="catalogue-entry-info">
-              <div className="catalogue-entry-artist">{row.artist}</div>
+              <div className="catalogue-entry-artist">{row.artist.toUpperCase()}</div>
               <div className="catalogue-entry-title">{row.title}</div>
             </div>
           </div>
@@ -52,11 +50,19 @@ export default function FillerCatalogue({ catalogue, phoneNumber }) {
 
       <div className="catalogue-footer">
         <div className="catalogue-footer-info">
-          {phoneNumber && (
-            <>50p/min<br/>AT ALL TIMES<br/>UNDER 18? Get Parents permission</>
+          {phoneNumber ? (
+            <>
+              <span className="catalogue-price">50p/min</span>
+              {' / '}
+              <span className="catalogue-phone">{phoneNumber}</span>
+            </>
+          ) : (
+            <span className="catalogue-price">Request your video now</span>
           )}
         </div>
-        <div className="catalogue-footer-cta">Call Now</div>
+        <div className="catalogue-footer-disclaimer">
+          Under 18? Get Parent's Permission
+        </div>
       </div>
     </div>
   )
