@@ -7,23 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  go:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
-      - run: go vet ./...
-      - run: go build ./...
-      - run: go test ./...
-
-  frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: web/channel
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -31,5 +16,15 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
           cache-dependency-path: web/channel/package-lock.json
-      - run: npm ci
-      - run: npm run build
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Build frontend
+        working-directory: web/channel
+        run: |
+          npm ci
+          npm run build
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test ./...
