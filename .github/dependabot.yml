@@ -1,0 +1,69 @@
+version: 2
+updates:
+  # Go modules — backend code that ships in the rmbd/rmbctl binaries.
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      gomod-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "fix"
+      include: scope
+
+  # npm deps — React/Vite bundle is embedded into rmbd, so treat bumps as fix.
+  - package-ecosystem: npm
+    directory: /web/channel
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      npm-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "fix"
+      include: scope
+
+  # Dockerfile base images — ship in the container.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build"
+      include: scope
+
+  # GitHub Actions — CI-only, no bundle impact, don't cut releases.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+      include: scope

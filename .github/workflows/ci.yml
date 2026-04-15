@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Native build + vet/test catches Go issues fast without paying the full
+  # docker build cost. The frontend has to be built first because rmbd embeds
+  # cmd/rmbd/static via //go:embed.
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/channel/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+      - name: Build frontend
+        working-directory: web/channel
+        run: |
+          npm ci
+          npm run build
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test ./...
+      - name: go build
+        run: |
+          go build -o rmbd ./cmd/rmbd
+          go build -o rmbctl ./cmd/rmbctl
+
+  # Validates the shipped artifact: Dockerfile, CGO toolchain, yt-dlp install,
+  # and the embedded SPA all build cleanly. Doesn't push on PRs.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
