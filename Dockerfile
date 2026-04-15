@@ -1,5 +1,5 @@
 # Build React frontend
-FROM node:20-alpine AS frontend
+FROM node:25-alpine AS frontend
 WORKDIR /app/web/channel
 COPY web/channel/package*.json ./
 RUN npm ci
@@ -7,7 +7,7 @@ COPY web/channel/ ./
 RUN npm run build
 
 # Build Go backend
-FROM golang:1.24-alpine AS backend
+FROM golang:1.26-alpine AS backend
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -18,7 +18,7 @@ RUN CGO_ENABLED=1 go build -o rmbd ./cmd/rmbd
 RUN CGO_ENABLED=1 go build -o rmbctl ./cmd/rmbctl
 
 # Runtime
-FROM alpine:3.19
+FROM alpine:3.23
 RUN apk add --no-cache ffmpeg python3 py3-pip ca-certificates && \
     pip3 install --break-system-packages yt-dlp
 
