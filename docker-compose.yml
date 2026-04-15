@@ -1,0 +1,11 @@
+services:
+  rmbd:
+    image: ghcr.io/alexkinch/retromusicbox:${RMBD_TAG:-latest}
+    container_name: rmbd
+    ports:
+      - "8080:8080"
+    volumes:
+      # Persistent cache, transcoded outputs, thumbnails, and sqlite db.
+      # Everything else (configs/, assets/) is baked into the image.
+      - ./data:/app/data
+    restart: unless-stopped
