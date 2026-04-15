@@ -19,7 +19,7 @@ RUN CGO_ENABLED=1 go build -o rmbctl ./cmd/rmbctl
 
 # Runtime
 FROM alpine:3.23
-RUN apk add --no-cache ffmpeg python3 py3-pip ca-certificates && \
+RUN apk add --no-cache ffmpeg python3 py3-pip ca-certificates deno && \
     pip3 install --break-system-packages yt-dlp
 
 WORKDIR /app

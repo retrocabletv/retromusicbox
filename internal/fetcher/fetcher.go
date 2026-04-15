@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -111,7 +112,7 @@ func (s *Service) SetOnReady(fn func(string)) {
 
 func (s *Service) UpdateYtDlp() {
 	log.Println("[fetcher] updating yt-dlp...")
-	cmd := exec.Command(s.cfg.YtDlpPath, "-U")
+	cmd := exec.Command("pip3", "install", "--break-system-packages", "--upgrade", "yt-dlp")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -128,9 +129,11 @@ func (s *Service) FetchPlaylistVideoIDs(playlistURL string) ([]string, error) {
 		"--print", "id",
 		playlistURL,
 	)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("yt-dlp playlist listing failed: %w", err)
+		return nil, fmt.Errorf("yt-dlp playlist listing failed: %w: %s", err, strings.TrimSpace(stderr.String()))
 	}
 	var ids []string
 	for _, line := range strings.Split(string(output), "\n") {
@@ -145,9 +148,11 @@ func (s *Service) FetchPlaylistVideoIDs(playlistURL string) ([]string, error) {
 func (s *Service) FetchVideoInfo(youtubeID string) (*VideoInfo, error) {
 	cmd := exec.Command(s.cfg.YtDlpPath, "--dump-json", "--no-download",
 		fmt.Sprintf("https://www.youtube.com/watch?v=%s", youtubeID))
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("yt-dlp info failed: %w", err)
+		return nil, fmt.Errorf("yt-dlp info failed: %w: %s", err, strings.TrimSpace(stderr.String()))
 	}
 
 	var info VideoInfo
