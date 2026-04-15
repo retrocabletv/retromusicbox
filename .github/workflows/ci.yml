@@ -7,19 +7,24 @@ on:
     branches: [main]
 
 jobs:
-  # Builds the shipping artifact end-to-end: Vite SPA -> //go:embed -> CGO
-  # Go build for rmbd and rmbctl -> runtime image with ffmpeg + yt-dlp. If
-  # this passes, the container the release workflow will push is known-good.
-  # Doesn't push on PRs.
-  docker:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: docker/setup-buildx-action@v4
-      - name: Build image
-        uses: docker/build-push-action@v7
+      - uses: actions/setup-node@v6
         with:
-          context: .
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          node-version: 'lts/*'
+          cache: 'npm'
+          cache-dependency-path: web/channel/package-lock.json
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Build frontend
+        working-directory: web/channel
+        run: |
+          npm ci
+          npm run build
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test ./...
