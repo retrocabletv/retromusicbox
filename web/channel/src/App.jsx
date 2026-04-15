@@ -10,7 +10,12 @@ import Transition from './components/Transition'
 import Scanlines from './components/Scanlines'
 
 export default function App() {
-  const [started, setStarted] = useState(false)
+  // ?autoplay=1 skips the click-to-start gate — used by headless streamers
+  // (webpagestreamer, etc.) that can't satisfy browser gesture requirements.
+  // Direct human visitors still click once so audio autoplay isn't blocked.
+  const [started, setStarted] = useState(() =>
+    new URLSearchParams(window.location.search).get('autoplay') === '1'
+  )
   const [mode, setMode] = useState('filler') // filler | playing | transition
   const [video, setVideo] = useState(null)
   const [queue, setQueue] = useState([])
