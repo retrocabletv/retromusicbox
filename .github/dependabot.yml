@@ -20,6 +20,10 @@ updates:
       include: scope
 
   # npm deps — React/Vite bundle is embedded into rmbd, so treat bumps as fix.
+  # Major bumps are ignored: the React + Vite + plugin-react + @types/react(-dom)
+  # cluster is peer-coupled, and Dependabot opens majors as ungrouped PRs even
+  # when a group is defined, so React 19 / Vite 8 / etc. need to be taken as a
+  # coordinated manual upgrade rather than a stream of broken individual PRs.
   - package-ecosystem: npm
     directory: /web/channel
     schedule:
@@ -34,6 +38,10 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
     commit-message:
       prefix: "fix"
       include: scope
