@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/alexkinch/retromusicbox/compare/v0.2.1...v0.3.0) (2026-04-15)
+
+
+### Features
+
+* **channel:** skip click-to-start when ?autoplay=1 is set ([#19](https://github.com/alexkinch/retromusicbox/issues/19)) ([4f6babd](https://github.com/alexkinch/retromusicbox/commit/4f6babdba97072dcd0821fd940c44db687ba9fe4))
+
 ## [0.2.1](https://github.com/alexkinch/retromusicbox/compare/v0.2.0...v0.2.1) (2026-04-15)
 
 
