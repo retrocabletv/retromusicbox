@@ -86,6 +86,9 @@ func main() {
 	mux.HandleFunc("DELETE /api/queue/{id}", handleDeleteQueue(queueService, controller))
 	mux.HandleFunc("POST /api/queue/skip", handleSkip(controller))
 
+	// Frontend config (client-shaped subset; not the full server Config)
+	mux.HandleFunc("GET /api/config", handleConfig(cfg.Channel))
+
 	// WebSocket
 	mux.HandleFunc("GET /ws", hub.HandleWebSocket)
 
@@ -426,6 +429,32 @@ func handleSkip(ctrl *playout.Controller) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctrl.Skip()
 		jsonResponse(w, map[string]string{"status": "skipped"})
+	}
+}
+
+// clientConfig is the frontend-shaped subset of Config exposed via /api/config.
+// Server-only fields (paths, db, fetcher internals) are deliberately omitted.
+type clientConfig struct {
+	Channel clientChannelConfig `json:"channel"`
+}
+
+type clientChannelConfig struct {
+	Width              int    `json:"width"`
+	Height             int    `json:"height"`
+	PhoneNumberDisplay string `json:"phone_number_display"`
+	CRTEnabled         bool   `json:"crt_enabled"`
+}
+
+func handleConfig(channelCfg config.ChannelConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		jsonResponse(w, clientConfig{
+			Channel: clientChannelConfig{
+				Width:              channelCfg.Width,
+				Height:             channelCfg.Height,
+				PhoneNumberDisplay: channelCfg.PhoneNumberDisplay,
+				CRTEnabled:         channelCfg.CRTEnabled,
+			},
+		})
 	}
 }
 

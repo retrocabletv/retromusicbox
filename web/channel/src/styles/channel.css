@@ -40,7 +40,11 @@ html, body, #root {
   overflow: hidden;
   background: #000;
   margin: 0 auto;
-  /* Subtle brightness/contrast to simulate CRT output */
+}
+
+/* Subtle brightness/contrast/saturation to simulate CRT output. Toggled by
+   the .crt class which the App applies based on /api/config -> crt_enabled. */
+.channel.crt {
   filter: contrast(1.05) brightness(0.95) saturate(1.1);
 }
 

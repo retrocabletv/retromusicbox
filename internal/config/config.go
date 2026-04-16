@@ -69,6 +69,7 @@ type ChannelConfig struct {
 	Width              int    `yaml:"width"`
 	Height             int    `yaml:"height"`
 	PhoneNumberDisplay string `yaml:"phone_number_display"`
+	CRTEnabled         bool   `yaml:"crt_enabled"`
 }
 
 func Load(path string) (*Config, error) {
@@ -106,6 +107,7 @@ func Load(path string) (*Config, error) {
 			Width:              1280,
 			Height:             720,
 			PhoneNumberDisplay: "0900 RETROMUSICBOX",
+			CRTEnabled:         true,
 		},
 	}
 
