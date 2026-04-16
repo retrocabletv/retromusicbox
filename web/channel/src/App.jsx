@@ -25,6 +25,8 @@ export default function App() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [transitionVideo, setTransitionVideo] = useState(null)
   const [callers, setCallers] = useState([])
+  // Default to CRT-on so we don't flash a non-CRT frame before /api/config returns.
+  const [crtEnabled, setCrtEnabled] = useState(true)
 
   // Catalogue rotates alphabetically by artist (then title) on screen, even
   // though the backend stores it by code. Matches the original Box preview.
@@ -42,6 +44,13 @@ export default function App() {
     fetch('/api/catalogue?limit=999')
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setCatalogue(data) })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((data) => { if (data?.channel) setCrtEnabled(data.channel.crt_enabled !== false) })
       .catch(() => {})
   }, [])
 
@@ -99,9 +108,11 @@ export default function App() {
     sendMessage({ type: 'video_error', error })
   }, [sendMessage])
 
+  const channelClass = crtEnabled ? 'channel crt' : 'channel'
+
   if (!started) {
     return (
-      <div className="channel" onClick={() => setStarted(true)} style={{ cursor: 'pointer' }}>
+      <div className={channelClass} onClick={() => setStarted(true)} style={{ cursor: 'pointer' }}>
         <div className="click-to-start">
           <div className="ident-title" style={{ fontSize: '48px' }}>RETROMUSICBOX</div>
           <div style={{
@@ -117,7 +128,7 @@ export default function App() {
   }
 
   return (
-    <div className="channel">
+    <div className={channelClass}>
       {!connected && (
         <div className="connecting-indicator">CONNECTING...</div>
       )}
@@ -163,8 +174,8 @@ export default function App() {
         )}
       </div>
 
-      {/* Layer 3: Scanlines (topmost) */}
-      <Scanlines />
+      {/* Layer 3: Scanlines (topmost) — only when CRT is enabled */}
+      {crtEnabled && <Scanlines />}
     </div>
   )
 }

@@ -48,3 +48,7 @@ channel:
   width: 720
   height: 576
   phone_number_display: "0900 RETROMUSICBOX"
+  # CRT effect (scanlines, vignette, contrast/saturate filter). Set to false
+  # when feeding the channel into a real display or a downstream encoder
+  # that already adds its own scaling/scanlines.
+  crt_enabled: true
