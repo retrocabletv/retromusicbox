@@ -2,9 +2,15 @@ package queue
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
+
+// ErrRateLimit is returned by Add when the caller has exceeded
+// MaxRequestsPerCallerPerHour. Callers can detect it with errors.Is so they
+// can surface a specific user-facing message instead of a generic failure.
+var ErrRateLimit = errors.New("rate limit exceeded")
 
 // queueOrder defines how queued/ready items are sorted.
 // Most-voted videos play first; ties broken by arrival time.
@@ -85,7 +91,7 @@ func (s *Service) Add(catalogueCode, callerID string) (*Request, int, error) {
 			return nil, 0, err
 		}
 		if count >= s.maxRequestsPerCallerPerHour {
-			return nil, 0, fmt.Errorf("rate limit exceeded: max %d requests per hour", s.maxRequestsPerCallerPerHour)
+			return nil, 0, fmt.Errorf("%w: max %d requests per hour", ErrRateLimit, s.maxRequestsPerCallerPerHour)
 		}
 	}
 
