@@ -127,6 +127,7 @@ func (s *Service) FetchPlaylistVideoIDs(playlistURL string) ([]string, error) {
 	cmd := exec.Command(s.cfg.YtDlpPath,
 		"--flat-playlist",
 		"--print", "id",
+		"--remote-components", "ejs:github",
 		playlistURL,
 	)
 	var stderr bytes.Buffer
@@ -147,6 +148,7 @@ func (s *Service) FetchPlaylistVideoIDs(playlistURL string) ([]string, error) {
 
 func (s *Service) FetchVideoInfo(youtubeID string) (*VideoInfo, error) {
 	cmd := exec.Command(s.cfg.YtDlpPath, "--dump-json", "--no-download",
+		"--remote-components", "ejs:github",
 		fmt.Sprintf("https://www.youtube.com/watch?v=%s", youtubeID))
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -218,6 +220,10 @@ func (s *Service) FetchAndTranscode(youtubeID string) error {
 		cmd := exec.Command(s.cfg.YtDlpPath,
 			"-f", fmt.Sprintf("bestvideo[height<=%d]+bestaudio/best[height<=%d]", s.cfg.MaxResolution, s.cfg.MaxResolution),
 			"--merge-output-format", "mkv",
+			// EJS solver from GitHub — unlocks signature/n challenges so we can
+			// pick h264 source formats instead of AV1, making the ffmpeg stage
+			// a near-instant stream-copy instead of a CPU-bound transcode.
+			"--remote-components", "ejs:github",
 			"-o", cachePath,
 			fmt.Sprintf("https://www.youtube.com/watch?v=%s", youtubeID),
 		)
