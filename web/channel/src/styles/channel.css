@@ -33,6 +33,18 @@ html, body, #root {
 */
 .channel {
   --channel-font: 'STV5730A', monospace;
+  /* Safe zones for 720x576 SD PAL output. Two nested rings following the
+     broadcast convention:
+       --action-safe-*  — outer ring. All visual overlays (ticker, logo,
+                          blinking indicators) MUST stay inside this.
+       --title-safe-*   — inner ring. All TEXT and critical graphics must
+                          stay inside this. Strictly contained by action-safe.
+     Pixel values tuned to the installed-base TVs we target; bump both y
+     values if overscan turns out to be worse than expected. */
+  --action-safe-x: 20px;
+  --action-safe-y: 18px;
+  --title-safe-x:  40px;
+  --title-safe-y:  30px;
   font-family: var(--channel-font);
   position: relative;
   width: 720px;
@@ -47,12 +59,6 @@ html, body, #root {
 .channel.crt {
   filter: contrast(1.05) brightness(0.95) saturate(1.1);
 }
-
-/* ===== Safe Zone Constants =====
-   Left/Right: 20px
-   Top: 12px
-   Bottom: 18px
-   ================================ */
 
 /* ===== Video Layer (fills entire frame) ===== */
 .video-player {
@@ -96,8 +102,8 @@ html, body, #root {
 /* ===== Channel Logo (top-right, title safe) ===== */
 .channel-logo {
   position: absolute;
-  top: 30px;
-  right: 36px;
+  top: var(--title-safe-y);
+  right: var(--title-safe-x);
   z-index: 15;
 }
 
@@ -111,7 +117,9 @@ html, body, #root {
 /* ===== Catalogue Code Badge (next to logo) ===== */
 .code-badge {
   position: absolute;
-  top: 32px;
+  /* Sits next to .channel-logo — align with its title-safe top, offset
+     horizontally so it clears the logo. */
+  top: var(--title-safe-y);
   right: 110px;
   z-index: 15;
   display: flex;
@@ -142,8 +150,10 @@ html, body, #root {
 /* ===== Now Playing Caption (top-left, transient) ===== */
 .now-playing {
   position: absolute;
+  /* top:90 places this well below the logo; no safe-zone concern.
+     left uses title-safe-x because this is text. */
   top: 90px;
-  left: 36px;
+  left: var(--title-safe-x);
   z-index: 15;
   padding: 8px 12px;
   max-width: 560px;
@@ -180,9 +190,9 @@ html, body, #root {
 /* ===== Bottom Ticker (two lines, static swap over video) ===== */
 .bottom-ticker {
   position: absolute;
-  bottom: 18px;
-  left: 20px;
-  right: 20px;
+  bottom: var(--action-safe-y);
+  left: var(--action-safe-x);
+  right: var(--action-safe-x);
   z-index: 15;
 }
 
@@ -231,9 +241,9 @@ html, body, #root {
 /* ===== Request Digits — occupies the same slot as .bottom-ticker ===== */
 .request-digits {
   position: absolute;
-  bottom: 18px;
-  left: 20px;
-  right: 20px;
+  bottom: var(--action-safe-y);
+  left: var(--action-safe-x);
+  right: var(--action-safe-x);
   z-index: 20;
 }
 
@@ -273,8 +283,8 @@ html, body, #root {
 /* ===== Connecting Indicator ===== */
 .connecting-indicator {
   position: absolute;
-  top: 12px;
-  right: 20px;
+  top: var(--action-safe-y);
+  right: var(--action-safe-x);
   z-index: 100;
   font-size: 10px;
   font-weight: bold;
@@ -396,7 +406,8 @@ html, body, #root {
 }
 
 .catalogue-header {
-  padding: 16px 40px 10px;
+  /* title-safe top padding so "MUSIC MENU" survives overscan */
+  padding: var(--title-safe-y) var(--title-safe-x) 10px;
   flex-shrink: 0;
   background: linear-gradient(180deg, rgba(80, 160, 100, 0.4) 0%, rgba(40, 100, 60, 0.2) 100%);
   border-bottom: 2px solid rgba(255, 255, 255, 0.15);
@@ -422,7 +433,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 8px 40px;
+  padding: 8px var(--title-safe-x);
   min-height: 80px;
   background: linear-gradient(180deg,
     rgba(60, 130, 80, 0.3) 0%,
@@ -477,7 +488,10 @@ html, body, #root {
 }
 
 .catalogue-footer {
-  padding: 12px 40px;
+  /* title-safe bottom padding so phone/disclaimer survive overscan.
+     top padding stays tight (12px) so the header separator line sits close
+     to the last entry — the footer's own height already pads the text. */
+  padding: 12px var(--title-safe-x) var(--title-safe-y);
   background: linear-gradient(180deg, rgba(20, 60, 35, 0.8) 0%, rgba(10, 40, 20, 0.9) 100%);
   border-top: 2px solid rgba(255, 255, 255, 0.1);
   display: flex;
