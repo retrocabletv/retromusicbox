@@ -1,11 +1,17 @@
 services:
   rmbd:
+    # Pull the published image by default. Pass `--build` to rebuild from the
+    # local Dockerfile context instead (useful when iterating on unreleased
+    # changes); the result gets tagged with the `image:` name below.
     image: ghcr.io/alexkinch/retromusicbox:${RMBD_TAG:-latest}
+    build: .
     container_name: rmbd
     ports:
       - "8080:8080"
     volumes:
       # Persistent cache, transcoded outputs, thumbnails, and sqlite db.
-      # Everything else (configs/, assets/) is baked into the image.
       - ./data:/app/data
+      # Host config is mounted read-only so you can tweak settings and pick
+      # them up with `docker compose restart rmbd` — no image rebuild needed.
+      - ./configs/config.yaml:/app/configs/config.yaml:ro
     restart: unless-stopped
