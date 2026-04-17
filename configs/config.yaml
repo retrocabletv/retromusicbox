@@ -18,7 +18,9 @@ fetcher:
   ready_dir: "data/ready"
   thumbnail_dir: "data/thumbnails"
   max_cache_gb: 50
-  prefetch_threshold: 3
+  # Number of upcoming queue items the prefetch worker keeps warm. Goroutines
+  # per video, so higher means more parallel downloads/transcodes in-flight.
+  prefetch_threshold: 5
   # EBU R128 loudness target applied by ffmpeg's loudnorm filter during
   # transcode, so every cached video lands at the same perceived volume.
   # -14 matches YouTube/Spotify-ish, -16 is podcast/broadcast. 0 disables.
