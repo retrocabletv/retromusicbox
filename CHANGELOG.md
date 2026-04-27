@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/retrocabletv/retromusicbox/compare/v0.5.1...v0.5.2) (2026-04-27)
+
+
+### Bug Fixes
+
+* **deps-dev:** Bump vite ([#28](https://github.com/retrocabletv/retromusicbox/issues/28)) ([b6bb62b](https://github.com/retrocabletv/retromusicbox/commit/b6bb62b1c3b6e84f931dc500ccf5ce131819b7f7))
+
 ## [0.5.1](https://github.com/retrocabletv/retromusicbox/compare/v0.5.0...v0.5.1) (2026-04-27)
 
 
