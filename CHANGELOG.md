@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/retrocabletv/retromusicbox/compare/v0.4.0...v0.5.0) (2026-04-27)
+
+
+### Features
+
+* **channel:** make broadcast safe zones a first-class concept ([#23](https://github.com/retrocabletv/retromusicbox/issues/23)) ([5ca5691](https://github.com/retrocabletv/retromusicbox/commit/5ca5691e0bcf20f659a5b99e0c30667145ba70f0))
+
+
+### Bug Fixes
+
+* enable yt-dlp EJS solver and widen prefetch window ([#25](https://github.com/retrocabletv/retromusicbox/issues/25)) ([12d0779](https://github.com/retrocabletv/retromusicbox/commit/12d0779a5130f1d6804d60e7cd8d68937ed9ae5c))
+
 ## [0.4.0](https://github.com/alexkinch/retromusicbox/compare/v0.3.0...v0.4.0) (2026-04-16)
 
 
