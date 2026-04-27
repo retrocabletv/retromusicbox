@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/retrocabletv/retromusicbox/compare/v0.5.2...v0.6.0) (2026-04-27)
+
+
+### Features
+
+* **ivr:** expose stable reason_code on session failures ([#26](https://github.com/retrocabletv/retromusicbox/issues/26)) ([b18ca31](https://github.com/retrocabletv/retromusicbox/commit/b18ca31e546e917f269d963a0ab3388a55ab94b0))
+
 ## [0.5.2](https://github.com/retrocabletv/retromusicbox/compare/v0.5.1...v0.5.2) (2026-04-27)
 
 
