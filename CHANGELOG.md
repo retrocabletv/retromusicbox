@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/retrocabletv/retromusicbox/compare/v0.5.0...v0.5.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **ci:** export only the release binaries from a scratch stage ([#32](https://github.com/retrocabletv/retromusicbox/issues/32)) ([d472f66](https://github.com/retrocabletv/retromusicbox/commit/d472f66695306bee4227309394095cc22e531ebd))
+
 ## [0.5.0](https://github.com/retrocabletv/retromusicbox/compare/v0.4.0...v0.5.0) (2026-04-27)
 
 
