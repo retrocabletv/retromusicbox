@@ -35,6 +35,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -62,6 +63,17 @@ const (
 	statusFail      sessionStatus = "fail"
 )
 
+// Stable machine-readable reason codes returned alongside status=fail so
+// front-ends (telephony TTS, web UI) can branch on a known string instead
+// of pattern-matching the human-readable Reason message. Keep these
+// additive — clients should treat unknown codes as a generic failure.
+const (
+	reasonIncompleteCode = "incomplete_code"
+	reasonUnknownCode    = "unknown_code"
+	reasonRateLimited    = "rate_limited"
+	reasonQueueError     = "queue_error"
+)
+
 type session struct {
 	ID         string        `json:"id"`
 	Digits     string        `json:"digits"`
@@ -69,10 +81,11 @@ type session struct {
 	CallerID   string        `json:"caller_id,omitempty"`
 	CreatedAt  time.Time     `json:"-"`
 	UpdatedAt  time.Time     `json:"-"`
-	entry      *catalogue.Entry
-	position   int
-	failReason string
-	committing bool
+	entry          *catalogue.Entry
+	position       int
+	failReason     string
+	failReasonCode string
+	committing     bool
 }
 
 type Handler struct {
@@ -166,8 +179,11 @@ type sessionResponse struct {
 	Title    string `json:"title,omitempty"`
 	Artist   string `json:"artist,omitempty"`
 	Position int    `json:"position,omitempty"`
-	// Populated on status=fail
-	Reason string `json:"reason,omitempty"`
+	// Populated on status=fail. Reason is human-readable and may change;
+	// ReasonCode is a stable machine-readable identifier for clients to
+	// branch on (see reason* constants).
+	Reason     string `json:"reason,omitempty"`
+	ReasonCode string `json:"reason_code,omitempty"`
 }
 
 // handleDigit is state-aware. In `dialling` it accumulates digits and
@@ -321,19 +337,19 @@ func (h *Handler) submit(w http.ResponseWriter, id string) {
 	h.mu.Unlock()
 
 	if len(code) != CodeLength {
-		h.finalise(id, statusFail, "incomplete code", nil, 0)
+		h.finalise(id, statusFail, "incomplete code", reasonIncompleteCode, nil, 0)
 		writeJSON(w, http.StatusOK, h.snapshot(id))
 		return
 	}
 
 	entry, err := h.catalogue.GetByCode(code)
 	if err != nil || entry == nil {
-		h.finalise(id, statusFail, "unknown code", nil, 0)
+		h.finalise(id, statusFail, "unknown code", reasonUnknownCode, nil, 0)
 		writeJSON(w, http.StatusOK, h.snapshot(id))
 		return
 	}
 
-	h.finalise(id, statusValidated, "", entry, 0)
+	h.finalise(id, statusValidated, "", "", entry, 0)
 	writeJSON(w, http.StatusOK, h.snapshot(id))
 }
 
@@ -369,12 +385,16 @@ func (h *Handler) confirm(w http.ResponseWriter, id string) {
 			s.committing = false
 		}
 		h.mu.Unlock()
-		h.finalise(id, statusFail, err.Error(), entry, 0)
+		code := reasonQueueError
+		if errors.Is(err, queue.ErrRateLimit) {
+			code = reasonRateLimited
+		}
+		h.finalise(id, statusFail, err.Error(), code, entry, 0)
 		writeJSON(w, http.StatusOK, h.snapshot(id))
 		return
 	}
 
-	h.finalise(id, statusSuccess, "", entry, position)
+	h.finalise(id, statusSuccess, "", "", entry, position)
 	if h.onChange != nil {
 		h.onChange()
 	}
@@ -415,7 +435,7 @@ func (h *Handler) handleGet(w http.ResponseWriter, r *http.Request) {
 
 // --- internals --------------------------------------------------------------
 
-func (h *Handler) finalise(id string, status sessionStatus, reason string, entry *catalogue.Entry, position int) {
+func (h *Handler) finalise(id string, status sessionStatus, reason, reasonCode string, entry *catalogue.Entry, position int) {
 	h.mu.Lock()
 	s, ok := h.sessions[id]
 	if !ok {
@@ -425,6 +445,7 @@ func (h *Handler) finalise(id string, status sessionStatus, reason string, entry
 	s.Status = status
 	s.UpdatedAt = time.Now()
 	s.failReason = reason
+	s.failReasonCode = reasonCode
 	if entry != nil {
 		s.entry = entry
 	}
@@ -448,10 +469,11 @@ func (h *Handler) snapshot(id string) sessionResponse {
 
 func (h *Handler) snapshotLocked(s *session) sessionResponse {
 	resp := sessionResponse{
-		ID:     s.ID,
-		Digits: s.Digits,
-		Status: s.Status,
-		Reason: s.failReason,
+		ID:         s.ID,
+		Digits:     s.Digits,
+		Status:     s.Status,
+		Reason:     s.failReason,
+		ReasonCode: s.failReasonCode,
 	}
 	if s.entry != nil {
 		resp.Code = s.entry.Code
