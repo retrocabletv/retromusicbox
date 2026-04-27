@@ -30,7 +30,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Set up QEMU
         if: ${{ steps.tag.outputs.should_build == 'true' }}
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
 
