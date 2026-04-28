@@ -1,11 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"text/tabwriter"
+	"time"
 
 	"github.com/alexkinch/retromusicbox/internal/catalogue"
 	"github.com/alexkinch/retromusicbox/internal/config"
@@ -39,6 +44,8 @@ func main() {
 		cacheAll(cfg)
 	case "refresh":
 		refreshMetadata(cfg)
+	case "request":
+		requestVideo(cfg)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		printUsage()
@@ -62,6 +69,10 @@ func printUsage() {
 	fmt.Println("  search --query <QUERY>           Search by artist/title")
 	fmt.Println("  cache-all                        Fetch and transcode all catalogue videos")
 	fmt.Println("  refresh                          Re-fetch metadata from YouTube and reindex codes to 3-digit")
+	fmt.Println("  request --code <CODE> [--now] [--api-url <URL>]")
+	fmt.Println("                                   Make an operator selection. Bumps the code to the front")
+	fmt.Println("                                   of the queue. With --now, also preempts the currently")
+	fmt.Println("                                   playing video. Talks to a running rmbd over HTTP.")
 }
 
 func loadConfig() *config.Config {
@@ -411,4 +422,82 @@ func derefInt(p *int) int {
 		return 0
 	}
 	return *p
+}
+
+func requestVideo(cfg *config.Config) {
+	code := ""
+	apiURL := ""
+	now := false
+	for i := 2; i < len(os.Args); i++ {
+		switch os.Args[i] {
+		case "--code":
+			if i+1 < len(os.Args) {
+				code = os.Args[i+1]
+				i++
+			}
+		case "--api-url":
+			if i+1 < len(os.Args) {
+				apiURL = os.Args[i+1]
+				i++
+			}
+		case "--now":
+			now = true
+		}
+	}
+	if code == "" {
+		log.Fatal("Usage: rmbctl request --code <CODE> [--now] [--api-url <URL>]")
+	}
+
+	if apiURL == "" {
+		if envURL := os.Getenv("RMBD_URL"); envURL != "" {
+			apiURL = envURL
+		} else {
+			apiURL = fmt.Sprintf("http://localhost:%d", cfg.Server.Port)
+		}
+	}
+
+	body, err := json.Marshal(map[string]interface{}{
+		"code":      code,
+		"caller_id": "operator",
+		"force":     now,
+	})
+	if err != nil {
+		log.Fatalf("Failed to encode request: %v", err)
+	}
+
+	url := apiURL + "/api/queue/playnow"
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Post(url, "application/json", bytes.NewReader(body))
+	if err != nil {
+		log.Fatalf("Failed to reach rmbd at %s: %v", url, err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode >= 400 {
+		var errMsg struct {
+			Error string `json:"error"`
+		}
+		_ = json.Unmarshal(respBody, &errMsg)
+		if errMsg.Error == "" {
+			errMsg.Error = string(respBody)
+		}
+		log.Fatalf("Request rejected (%d): %s", resp.StatusCode, errMsg.Error)
+	}
+
+	var result struct {
+		Title  string `json:"title"`
+		Artist string `json:"artist"`
+		Forced bool   `json:"forced"`
+	}
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		log.Fatalf("Failed to parse response: %v", err)
+	}
+
+	verb := "queued (next up)"
+	if result.Forced {
+		verb = "playing now"
+	}
+	fmt.Printf("[%s] %s - %s — %s\n", code, result.Artist, result.Title, verb)
 }

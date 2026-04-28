@@ -48,6 +48,17 @@ func NewService(db *sql.DB, maxPerHour int, allowDuplicate bool) *Service {
 }
 
 func (s *Service) Add(catalogueCode, callerID string) (*Request, int, error) {
+	return s.add(catalogueCode, callerID, true)
+}
+
+// AddBypassRateLimit is like Add but skips the per-caller hourly rate limit.
+// Used for operator-initiated requests (e.g. the rmbctl playnow command) that
+// are not driven by an end-user.
+func (s *Service) AddBypassRateLimit(catalogueCode, callerID string) (*Request, int, error) {
+	return s.add(catalogueCode, callerID, false)
+}
+
+func (s *Service) add(catalogueCode, callerID string, applyRateLimit bool) (*Request, int, error) {
 	// Vote stacking: if this video is already queued, increment its vote count
 	if !s.allowDuplicate {
 		var existingID int64
@@ -80,7 +91,7 @@ func (s *Service) Add(catalogueCode, callerID string) (*Request, int, error) {
 	}
 
 	// Rate limit per caller
-	if callerID != "" && callerID != "web" {
+	if applyRateLimit && callerID != "" && callerID != "web" {
 		var count int
 		oneHourAgo := time.Now().Add(-1 * time.Hour).Format(time.DateTime)
 		err := s.db.QueryRow(
@@ -115,6 +126,29 @@ func (s *Service) Add(catalogueCode, callerID string) (*Request, int, error) {
 	}
 
 	return req, position, nil
+}
+
+// Prioritise bumps a request's vote_count above every other active item so it
+// becomes next in queue order. The request must still be active (queued,
+// ready, or fetching) — already-played or failed entries are left alone.
+func (s *Service) Prioritise(id int64) error {
+	result, err := s.db.Exec(
+		`UPDATE requests
+		 SET vote_count = COALESCE((
+		     SELECT MAX(vote_count) FROM requests
+		     WHERE status IN ('queued', 'ready', 'fetching') AND id != ?
+		 ), 0) + 1
+		 WHERE id = ? AND status IN ('queued', 'ready', 'fetching')`,
+		id, id,
+	)
+	if err != nil {
+		return err
+	}
+	n, _ := result.RowsAffected()
+	if n == 0 {
+		return fmt.Errorf("request %d not active", id)
+	}
+	return nil
 }
 
 // positionOf returns the 1-based position of a request in the active queue.

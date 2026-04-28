@@ -85,6 +85,7 @@ func main() {
 	mux.HandleFunc("GET /api/queue", handleGetQueue(queueService))
 	mux.HandleFunc("DELETE /api/queue/{id}", handleDeleteQueue(queueService, controller))
 	mux.HandleFunc("POST /api/queue/skip", handleSkip(controller))
+	mux.HandleFunc("POST /api/queue/playnow", handlePlayNow(queueService, catService, fetcherService, controller))
 
 	// Frontend config (client-shaped subset; not the full server Config)
 	mux.HandleFunc("GET /api/config", handleConfig(cfg.Channel))
@@ -429,6 +430,76 @@ func handleSkip(ctrl *playout.Controller) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctrl.Skip()
 		jsonResponse(w, map[string]string{"status": "skipped"})
+	}
+}
+
+type playNowRequest struct {
+	Code     string `json:"code"`
+	CallerID string `json:"caller_id,omitempty"`
+	Force    bool   `json:"force,omitempty"`
+}
+
+// handlePlayNow is the operator-facing "select this and play it" endpoint
+// behind `rmbctl request`. It bumps the chosen catalogue code to the front of
+// the queue (bypassing the per-caller rate limit). With force=true it also
+// preempts whatever is currently playing.
+func handlePlayNow(q *queue.Service, cat *catalogue.Service, fetch *fetcher.Service, ctrl *playout.Controller) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req playNowRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			httpError(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if req.Code == "" {
+			httpError(w, "code is required", http.StatusBadRequest)
+			return
+		}
+
+		entry, err := cat.GetByCode(req.Code)
+		if err != nil || entry == nil {
+			httpError(w, "Catalogue code not found", http.StatusNotFound)
+			return
+		}
+
+		callerID := req.CallerID
+		if callerID == "" {
+			callerID = "operator"
+		}
+
+		request, _, err := q.AddBypassRateLimit(req.Code, callerID)
+		if err != nil {
+			httpError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := q.Prioritise(request.ID); err != nil {
+			httpError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Kick off a fetch if the file isn't already cached, so it can play as
+		// soon as the controller picks it up. The prefetch worker would do
+		// this on its next 5s tick anyway, but with --now we want it sooner.
+		if !fetch.IsReady(entry.YoutubeID) {
+			go func(ytID, code string) {
+				if err := fetch.FetchAndTranscode(ytID); err != nil {
+					log.Printf("[playnow] fetch failed for %s: %v", code, err)
+				}
+			}(entry.YoutubeID, req.Code)
+		}
+
+		if req.Force {
+			ctrl.Skip()
+		} else {
+			ctrl.NotifyQueueChange()
+		}
+
+		jsonResponse(w, map[string]interface{}{
+			"request": request,
+			"title":   entry.Title,
+			"artist":  entry.Artist,
+			"forced":  req.Force,
+		})
 	}
 }
 

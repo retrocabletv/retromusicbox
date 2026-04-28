@@ -163,6 +163,8 @@ Patent-faithful "stop sets" between requested videos. Drop short `.mp4`/`.webm`/
 
 **Request a video:** `POST /api/queue` with `{"code": "001"}`
 
+**Operator-issued selection:** `./rmbctl request --code 001 [--now]` or `POST /api/queue/playnow` with `{"code": "001", "force": true}`. Bumps the code to the front of the queue (bypassing the per-caller rate limit). With `--now` / `force: true` it also calls `Skip()` so the channel cuts to it immediately. The CLI talks to a running `rmbd` over HTTP — defaults to `http://localhost:{server.port}`, override with `--api-url` or `RMBD_URL`.
+
 **Pre-cache a video:** `POST /api/catalogue/001/cache`
 
 **Skip current:** `POST /api/queue/skip`
