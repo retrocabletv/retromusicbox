@@ -3,7 +3,7 @@ services:
     # Pull the published image by default. Pass `--build` to rebuild from the
     # local Dockerfile context instead (useful when iterating on unreleased
     # changes); the result gets tagged with the `image:` name below.
-    image: ghcr.io/alexkinch/retromusicbox:${RMBD_TAG:-latest}
+    image: ghcr.io/retrocabletv/retromusicbox:${RMBD_TAG:-latest}
     build: .
     container_name: rmbd
     ports:

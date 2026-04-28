@@ -12,34 +12,43 @@ A modern recreation of the 1990s interactive music video TV channel format. View
 
 ## Quick Start
 
-### Prerequisites
+The fastest path is the pre-built container image — no toolchain needed locally.
 
-- Go 1.22+
-- Node.js 20+
-- FFmpeg (with libx264, AAC)
-- yt-dlp
-- GCC (for SQLite CGo bindings)
-
-### Build
+### Run with Docker Compose (recommended)
 
 ```bash
-# Build everything (React frontend + Go binaries)
-make build
+# Pulls ghcr.io/retrocabletv/retromusicbox:latest, mounts ./data and
+# ./configs/config.yaml read-only, exposes :8080.
+docker compose up -d
+
+# Pin a specific version
+RMBD_TAG=0.6.0 docker compose up -d
 ```
 
-### Run
+The image is multi-arch (`linux/amd64`, `linux/arm64`). Each tagged release also publishes static Linux binaries — see [Releases](https://github.com/retrocabletv/retromusicbox/releases) for `rmbd-linux-amd64-musl`, `rmbctl-linux-amd64-musl`, and `SHA256SUMS-linux-amd64-musl.txt`.
+
+Bootstrap the catalogue inside the running container:
 
 ```bash
-# Initialise the database
+docker compose exec rmbd ./rmbctl init-db
+docker compose exec rmbd ./rmbctl add --youtube "dQw4w9WgXcQ"
+docker compose exec rmbd ./rmbctl add --youtube "y6120QOlsfU"
+```
+
+### Build from source
+
+Prerequisites: Go 1.22+, Node.js 20+, FFmpeg (with libx264, AAC), yt-dlp, GCC (for SQLite CGo bindings).
+
+```bash
+# React frontend + Go binaries
+make build
+
 ./rmbctl init-db
-
-# Add videos to the catalogue
 ./rmbctl add --youtube "dQw4w9WgXcQ"
-./rmbctl add --youtube "y6120QOlsfU"
-
-# Start the server
 ./rmbd --config configs/config.yaml
 ```
+
+To build the container image locally instead of pulling: `docker compose up -d --build`.
 
 ### URLs
 
@@ -51,13 +60,6 @@ make build
 | `http://localhost:8080/api/queue` | Queue API |
 | `http://localhost:8080/api/ivr/sessions` | IVR session API |
 | `http://localhost:8080/ws` | WebSocket (playout state) |
-
-### Docker
-
-```bash
-docker build -t retromusicbox .
-docker run -p 8080:8080 -v $(pwd)/data:/app/data retromusicbox
-```
 
 ## CLI (`rmbctl`)
 
