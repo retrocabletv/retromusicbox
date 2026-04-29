@@ -1,93 +1,24 @@
 /* ===== Channel Overrides =====
-   Edit this file to tweak channel styling without rebuilding.
-   Just save and refresh the browser.
+   Local-only styling hook.
+
+   rmbd serves this file from /assets/channel-overrides.css and the channel
+   page loads it after the bundled Vite CSS, so rules here win without a
+   rebuild. Keep the committed file neutral; edit it locally for site-specific
+   capture, font, or display tuning.
    ================================ */
 
-/* Font: set once via the --channel-font custom property. Inherited by every
-   descendant of .channel; no !important or wildcard selector required. */
+/* Example: use a locally installed font, falling back to the bundled font.
+
 .channel {
-  --channel-font: "URWLegothicW01-Bold";
+  --channel-font: "Your Local Font", "STV5730A", monospace;
 }
 
-/* Bottom ticker container — title safe zone, wider to compensate for scaleX */
+*/
+
+/* Example: tune ticker placement for a specific capture chain.
+
 .bottom-ticker {
-  left: 36px !important;
-  right: -80px !important;
-  bottom: 30px !important;
-  /* Clip at the actual safe zone */
-  clip-path: inset(0 116px 0 0) !important;
+  bottom: 28px;
 }
 
-/* Bottom ticker text */
-.ticker-line {
-  font-size: 27px !important;
-  height: 33px !important;
-  line-height: 33px !important;
-  font-weight: bold !important;
-  /* Compact horizontally to match the reference */
-  transform: scaleX(0.82) !important;
-  transform-origin: left center !important;
-  /* Tight tracking */
-  letter-spacing: -1px;
-  /* Clip at edge */
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  /* Heavy drop shadow — like genlock keying */
-  -webkit-text-stroke: 0px;
-  text-shadow:
-    3px 3px 0 #000,
-    2px 2px 0 #000,
-    1px 1px 0 #000,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    2px 0 0 #000,
-    0 2px 0 #000,
-    -2px 0 0 #000,
-    0 -2px 0 #000,
-    3px 0 0 #000,
-    0 3px 0 #000 !important;
-}
-
-/* Now playing caption — same treatment */
-.now-playing-artist,
-.now-playing-title,
-.now-playing-label {
-  transform: scaleX(0.82) !important;
-  transform-origin: left center !important;
-  letter-spacing: -1px;
-  text-shadow:
-    3px 3px 0 #000,
-    2px 2px 0 #000,
-    1px 1px 0 #000,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000 !important;
-}
-
-/* Request digits */
-.request-digits-text,
-.request-result {
-  transform: scaleX(0.82) !important;
-  transform-origin: left center !important;
-  letter-spacing: -1px;
-  text-shadow:
-    3px 3px 0 #000,
-    2px 2px 0 #000,
-    1px 1px 0 #000 !important;
-}
-
-/* Catalogue screen text */
-.catalogue-entry-artist,
-.catalogue-entry-title,
-.catalogue-code-tab span,
-.catalogue-header h2 {
-  transform: scaleX(0.82) !important;
-  transform-origin: left center !important;
-  letter-spacing: -1px;
-}
-
-/* Logo — translucent watermark style */
-.channel-logo-img {
-  opacity: 0.5 !important;
-}
+*/
