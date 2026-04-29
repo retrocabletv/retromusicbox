@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/retrocabletv/retromusicbox/compare/v0.7.1...v0.8.0) (2026-04-29)
+
+
+### Features
+
+* bundle Tektur channel font ([#42](https://github.com/retrocabletv/retromusicbox/issues/42)) ([ead33ae](https://github.com/retrocabletv/retromusicbox/commit/ead33ae3b4c2249c0b9274f17f92c2476dc04f65))
+
 ## [0.7.1](https://github.com/retrocabletv/retromusicbox/compare/v0.7.0...v0.7.1) (2026-04-29)
 
 
