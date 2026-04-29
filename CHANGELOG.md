@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/retrocabletv/retromusicbox/compare/v0.7.0...v0.7.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* move channel overrides into main CSS ([#39](https://github.com/retrocabletv/retromusicbox/issues/39)) ([269beb6](https://github.com/retrocabletv/retromusicbox/commit/269beb61469f203525051a540dd0c2ccffdfb1db))
+
 ## [0.7.0](https://github.com/retrocabletv/retromusicbox/compare/v0.6.0...v0.7.0) (2026-04-29)
 
 
