@@ -537,6 +537,82 @@ html, body, #root {
   max-width: 600px;
 }
 
+/* ===== Broadcast Reference Styling =====
+   These refinements were previously shipped through assets/channel-overrides.css.
+   They are part of the default channel look, so they live in the bundled CSS.
+   The external override file still loads after this for operator-local tuning. */
+
+.bottom-ticker {
+  left: 36px;
+  right: -80px;
+  bottom: 30px;
+  clip-path: inset(0 116px 0 0);
+}
+
+.ticker-line {
+  font-size: 27px;
+  height: 33px;
+  line-height: 33px;
+  font-weight: bold;
+  transform: scaleX(0.82);
+  transform-origin: left center;
+  letter-spacing: -1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-text-stroke: 0;
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    2px 0 0 #000,
+    0 2px 0 #000,
+    -2px 0 0 #000,
+    0 -2px 0 #000,
+    3px 0 0 #000,
+    0 3px 0 #000;
+}
+
+.now-playing-artist,
+.now-playing-title,
+.now-playing-label,
+.request-digits-text,
+.request-result,
+.catalogue-entry-artist,
+.catalogue-entry-title,
+.catalogue-code-tab span,
+.catalogue-header h2 {
+  transform: scaleX(0.82);
+  transform-origin: left center;
+  letter-spacing: -1px;
+}
+
+.now-playing-artist,
+.now-playing-title,
+.now-playing-label {
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+}
+
+.request-digits-text,
+.request-result {
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    1px 1px 0 #000;
+}
+
+.channel-logo-img {
+  opacity: 0.5;
+}
+
 /* ===== CRT Effects ===== */
 .scanlines {
   position: absolute;
