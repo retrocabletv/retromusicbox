@@ -1,5 +1,5 @@
 # Build React frontend
-FROM node:25-alpine AS frontend
+FROM node:26-alpine AS frontend
 WORKDIR /app/web/channel
 COPY web/channel/package*.json ./
 RUN npm ci
