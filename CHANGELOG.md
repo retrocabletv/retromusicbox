@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1](https://github.com/retrocabletv/retromusicbox/compare/v0.8.0...v0.8.1) (2026-05-14)
+
+
+### Bug Fixes
+
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#44](https://github.com/retrocabletv/retromusicbox/issues/44)) ([cc10b11](https://github.com/retrocabletv/retromusicbox/commit/cc10b11b0183c289674f1400b19181e4e194365d))
+* **deps:** Bump the npm-dependencies group ([#47](https://github.com/retrocabletv/retromusicbox/issues/47)) ([8f54d4d](https://github.com/retrocabletv/retromusicbox/commit/8f54d4d3b46aae4508cedd47c41414b72e303e8e))
+
 ## [0.8.0](https://github.com/retrocabletv/retromusicbox/compare/v0.7.1...v0.8.0) (2026-04-29)
 
 
