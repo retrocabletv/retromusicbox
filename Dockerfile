@@ -25,7 +25,7 @@ COPY --from=backend /app/rmbd /rmbd
 COPY --from=backend /app/rmbctl /rmbctl
 
 # Runtime
-FROM alpine:3.23
+FROM alpine:3.24
 RUN apk add --no-cache ffmpeg python3 py3-pip ca-certificates deno && \
     pip3 install --break-system-packages yt-dlp
 
