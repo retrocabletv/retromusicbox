@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.8.2](https://github.com/retrocabletv/retromusicbox/compare/v0.8.1...v0.8.2) (2026-07-02)
+
+
+### Bug Fixes
+
+* **deps-dev:** Bump @types/react ([#53](https://github.com/retrocabletv/retromusicbox/issues/53)) ([4428780](https://github.com/retrocabletv/retromusicbox/commit/4428780a2e8e10c4f4c83f615f735a56a1ac3886))
+* **deps-dev:** Bump the npm-dependencies group ([#48](https://github.com/retrocabletv/retromusicbox/issues/48)) ([3fb17d0](https://github.com/retrocabletv/retromusicbox/commit/3fb17d0c7c00c23854433f21eb2cb523b8a9e292))
+* **deps-dev:** Bump the npm-dependencies group ([#50](https://github.com/retrocabletv/retromusicbox/issues/50)) ([2f7eb1c](https://github.com/retrocabletv/retromusicbox/commit/2f7eb1ca6ef03da4362225c972e4f126bed6dd70))
+* **deps-dev:** Bump the npm-dependencies group ([#57](https://github.com/retrocabletv/retromusicbox/issues/57)) ([a0924ef](https://github.com/retrocabletv/retromusicbox/commit/a0924ef69eb0ff71db935eeadf099f0b2323c5aa))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#52](https://github.com/retrocabletv/retromusicbox/issues/52)) ([5e5bce4](https://github.com/retrocabletv/retromusicbox/commit/5e5bce440d82e7381610d6bffbb95184418aec7c))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#55](https://github.com/retrocabletv/retromusicbox/issues/55)) ([8d3d3d9](https://github.com/retrocabletv/retromusicbox/commit/8d3d3d95a694ef4ff2ae46c0e729fccafc78cb48))
+* **deps:** Bump the npm-dependencies group ([#51](https://github.com/retrocabletv/retromusicbox/issues/51)) ([f47726f](https://github.com/retrocabletv/retromusicbox/commit/f47726f13a11649c6ed7da318ed8a43d0c7c9d70))
+
+
+### Dependencies
+
+* **deps:** Bump alpine in the docker-dependencies group ([#54](https://github.com/retrocabletv/retromusicbox/issues/54)) ([6325a55](https://github.com/retrocabletv/retromusicbox/commit/6325a5582c49061e11f5b70999fdc725e7e2ca8d))
+
 ## [0.8.1](https://github.com/retrocabletv/retromusicbox/compare/v0.8.0...v0.8.1) (2026-05-14)
 
 
