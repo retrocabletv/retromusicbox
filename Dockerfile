@@ -7,7 +7,7 @@ COPY web/channel/ ./
 RUN npm run build
 
 # Build Go backend
-FROM golang:1.26-alpine AS backend
+FROM golang:1.27-alpine AS backend
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /app
 COPY go.mod go.sum ./
