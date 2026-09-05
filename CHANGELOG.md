@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.8.2](https://github.com/retrocabletv/retromusicbox/compare/v0.8.1...v0.8.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* **deps-dev:** Bump @types/react ([#53](https://github.com/retrocabletv/retromusicbox/issues/53)) ([4428780](https://github.com/retrocabletv/retromusicbox/commit/4428780a2e8e10c4f4c83f615f735a56a1ac3886))
+* **deps-dev:** Bump the npm-dependencies group ([#48](https://github.com/retrocabletv/retromusicbox/issues/48)) ([3fb17d0](https://github.com/retrocabletv/retromusicbox/commit/3fb17d0c7c00c23854433f21eb2cb523b8a9e292))
+* **deps-dev:** Bump the npm-dependencies group ([#50](https://github.com/retrocabletv/retromusicbox/issues/50)) ([2f7eb1c](https://github.com/retrocabletv/retromusicbox/commit/2f7eb1ca6ef03da4362225c972e4f126bed6dd70))
+* **deps-dev:** Bump the npm-dependencies group ([#57](https://github.com/retrocabletv/retromusicbox/issues/57)) ([a0924ef](https://github.com/retrocabletv/retromusicbox/commit/a0924ef69eb0ff71db935eeadf099f0b2323c5aa))
+* **deps-dev:** Bump the npm-dependencies group ([#65](https://github.com/retrocabletv/retromusicbox/issues/65)) ([20e0a4c](https://github.com/retrocabletv/retromusicbox/commit/20e0a4c5d423b3a0568cd787e2ce72f0684baef6))
+* **deps-dev:** Bump the npm-dependencies group ([#69](https://github.com/retrocabletv/retromusicbox/issues/69)) ([857e8a2](https://github.com/retrocabletv/retromusicbox/commit/857e8a26066e7f8a34c09dcd65470d1a189f2591))
+* **deps-dev:** Bump the npm-dependencies group ([#70](https://github.com/retrocabletv/retromusicbox/issues/70)) ([15efdcb](https://github.com/retrocabletv/retromusicbox/commit/15efdcb245da4a5d5df548cf4f89f6e52a8486fa))
+* **deps-dev:** Bump vite in /web/channel in the npm-dependencies group ([#58](https://github.com/retrocabletv/retromusicbox/issues/58)) ([52d04c4](https://github.com/retrocabletv/retromusicbox/commit/52d04c4ce5f1ab9ab513f5236b74382dda7f14e6))
+* **deps-dev:** Bump vite in /web/channel in the npm-dependencies group ([#60](https://github.com/retrocabletv/retromusicbox/issues/60)) ([485609d](https://github.com/retrocabletv/retromusicbox/commit/485609db30177441bfa035f30b7860d84c9eafc6))
+* **deps-dev:** Bump vite in /web/channel in the npm-dependencies group ([#61](https://github.com/retrocabletv/retromusicbox/issues/61)) ([7bf90ab](https://github.com/retrocabletv/retromusicbox/commit/7bf90abf1fb1a2893e64b2f40e067fe59d7e54b0))
+* **deps-dev:** Bump vite in /web/channel in the npm-dependencies group ([#66](https://github.com/retrocabletv/retromusicbox/issues/66)) ([e6e7442](https://github.com/retrocabletv/retromusicbox/commit/e6e744288c32ab43278fb239e0268990e18fc67f))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#52](https://github.com/retrocabletv/retromusicbox/issues/52)) ([5e5bce4](https://github.com/retrocabletv/retromusicbox/commit/5e5bce440d82e7381610d6bffbb95184418aec7c))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#55](https://github.com/retrocabletv/retromusicbox/issues/55)) ([8d3d3d9](https://github.com/retrocabletv/retromusicbox/commit/8d3d3d95a694ef4ff2ae46c0e729fccafc78cb48))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#59](https://github.com/retrocabletv/retromusicbox/issues/59)) ([96e9c16](https://github.com/retrocabletv/retromusicbox/commit/96e9c163240c152f133d2f42d25ae44c41011e00))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#64](https://github.com/retrocabletv/retromusicbox/issues/64)) ([4c8d761](https://github.com/retrocabletv/retromusicbox/commit/4c8d761baa3971671017e14606e64b11863d1afb))
+* **deps:** Bump github.com/mattn/go-sqlite3 ([#67](https://github.com/retrocabletv/retromusicbox/issues/67)) ([84c4a76](https://github.com/retrocabletv/retromusicbox/commit/84c4a76d1842cf8baf66795d8bf33396de8b4943))
+* **deps:** Bump the npm-dependencies group ([#51](https://github.com/retrocabletv/retromusicbox/issues/51)) ([f47726f](https://github.com/retrocabletv/retromusicbox/commit/f47726f13a11649c6ed7da318ed8a43d0c7c9d70))
+* **deps:** Bump the npm-dependencies group ([#63](https://github.com/retrocabletv/retromusicbox/issues/63)) ([003348e](https://github.com/retrocabletv/retromusicbox/commit/003348e610120187e80af452d0de65827a5413ff))
+
+
+### Dependencies
+
+* **deps:** Bump alpine in the docker-dependencies group ([#54](https://github.com/retrocabletv/retromusicbox/issues/54)) ([6325a55](https://github.com/retrocabletv/retromusicbox/commit/6325a5582c49061e11f5b70999fdc725e7e2ca8d))
+* **deps:** Bump golang in the docker-dependencies group ([#68](https://github.com/retrocabletv/retromusicbox/issues/68)) ([c892519](https://github.com/retrocabletv/retromusicbox/commit/c8925193c4888e9f0e8a2db92a6b83fdc0b11181))
+
 ## [0.8.1](https://github.com/retrocabletv/retromusicbox/compare/v0.8.0...v0.8.1) (2026-05-14)
 
 
